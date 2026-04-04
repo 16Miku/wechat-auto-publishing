@@ -1,0 +1,16 @@
+<project-dir>/
+├─ .baoyu-skills/
+│  ├─ .env
+│  ├─ baoyu-image-gen/
+│  │  └─ EXTEND.md
+│  └─ baoyu-cover-image/
+│     └─ EXTEND.md
+├─ article.md
+├─ cover.png
+├─ image1.jpg
+├─ image2.jpg
+├─ output/
+│  ├─ full_publish_result.json
+│  ├─ publish_log.jsonl
+│  └─ cron.log
+└─ run.sh

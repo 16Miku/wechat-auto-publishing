@@ -1,0 +1,4 @@
+# Example cron entry
+# Replace placeholders before use.
+
+0 8,17 * * * cd <project-dir> && /bin/bash ./run.sh >> ./output/cron.log 2>&1

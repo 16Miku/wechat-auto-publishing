@@ -1,0 +1,27 @@
+{
+  "title": "文章标题",
+  "run_started_at": "2026-01-01T08:00:00+08:00",
+  "run_finished_at": "2026-01-01T08:05:00+08:00",
+  "draft_publish": {
+    "success": true,
+    "media_id": "placeholder_media_id"
+  },
+  "formal_publish": {
+    "enabled": true,
+    "success": true,
+    "publish_id": "placeholder_publish_id",
+    "article_url": "https://mp.weixin.qq.com/..."
+  },
+  "images": {
+    "cover": "cover.png",
+    "body_images_enabled": true,
+    "image1": "image1.jpg",
+    "image2": "image2.jpg"
+  },
+  "gallery": {
+    "enabled": false,
+    "selected": [],
+    "remaining_count": null
+  },
+  "error": null
+}

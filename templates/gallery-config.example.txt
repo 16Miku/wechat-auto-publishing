@@ -1,0 +1,11 @@
+gallery_root = <gallery-root>
+gallery_source_dir = <gallery-root>/unused
+gallery_used_dir = <gallery-root>/used
+gallery_bad_dir = <gallery-root>/bad
+
+gallery_enabled = true
+gallery_strategy = random
+gallery_pick_count = 2
+gallery_consume_mode = move_to_used
+gallery_low_stock_threshold = 20
+gallery_allowed_ext = .jpg,.jpeg,.png,.webp
