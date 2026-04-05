@@ -25,6 +25,28 @@ Minimum expected tools:
 - `npx`
 - `bun`
 
+### Python 通过 uv 管理的情况
+
+如果用户使用 uv 管理 Python，`python3` 命令可能不存在。检查方式：
+
+```bash
+# 检查 uv 管理的 Python 版本
+uv python list --installed
+
+# 或直接用 python（不带 3）
+python --version
+```
+
+如果 `python3` 不可用但 `python` 可用，在脚本中使用 `python` 替代即可。
+
+### Bun 版本兼容性
+
+Bun 1.3.x 在 Windows 上与某些 npm 包（如 `simple-xml-to-json`）存在兼容性问题，可能导致运行时报 `SyntaxError`。
+
+建议：
+- 保持 Bun 为最新版本（`bun upgrade`）
+- 如果遇到兼容性问题，使用 Node.js 作为备用运行时（`node` 替代 `bun`）
+
 ## Required local capabilities
 
 Prefer these local skills or equivalent tooling if available:
@@ -56,6 +78,25 @@ Preferred order:
 2. `<project-dir>/.baoyu-skills/.env`
 3. `~/.baoyu-skills/.env`
 
+## 代理环境处理
+
+如果本地开启了 Clash/V2Ray 等代理工具，需要注意代理变量对不同 API 的影响：
+
+- AI 图片生成（Google API）：可能需要代理才能访问
+- 微信 API：必须直连，不能走代理
+
+建议在脚本开头统一处理代理变量：
+
+```bash
+# 清除代理环境变量（微信 API 需要直连）
+unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY
+
+# 如果需要代理访问 Google API，在生图阶段单独设置：
+# export https_proxy=http://127.0.0.1:7890
+```
+
+在生图和发布两个阶段分别处理代理设置，避免代理干扰微信 API 调用。
+
 ## Publishing dependency chain
 
 If the Markdown rendering chain is not ready, install it on the target machine:
@@ -66,6 +107,26 @@ npm install
 ```
 
 Adjust the path if the publishing skill lives elsewhere in the target environment.
+
+## baoyu-skills 安装
+
+baoyu-skills 是发布流程依赖的核心工具集。
+
+- 仓库地址：https://github.com/jimliu/baoyu-skills
+- 安装方式：
+
+```bash
+git clone https://github.com/jimliu/baoyu-skills.git
+cd baoyu-skills
+npm install    # monorepo 结构，主目录安装即可
+```
+
+- 如果 `npm install` 后使用 `bun` 运行报错，尝试用 `bun install` 重新安装依赖：
+
+```bash
+cd baoyu-skills
+bun install
+```
 
 ## External prerequisites
 

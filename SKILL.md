@@ -122,11 +122,21 @@ Use the local publishing pathway to send the article to WeChat draft.
 
 Do not treat publishing as successful unless the draft step returns a meaningful success result, such as a valid `media_id`.
 
+If `baoyu-post-to-wechat` 因依赖问题（如 `simple-xml-to-json` 兼容性错误）无法运行，使用备用脚本：
+
+```bash
+node templates/publish.mjs
+```
+
+备用脚本 `publish.mjs` 支持完整流程：获取 token -> 上传封面 -> 上传内图 -> Markdown 转 HTML -> 创建草稿 -> 正式发布 -> 归档结果。
+
 Read `references/publishing.md`.
 
 ### Step 7: Optionally complete formal publication
 
 If the workflow includes final publication, submit, poll, and capture the final URL.
+
+备用脚本 `templates/publish.mjs` 已内置正式发布功能（freepublish），如果使用备用脚本完成 Step 6，正式发布会自动执行，无需额外操作。
 
 ### Step 8: Archive results
 

@@ -51,17 +51,13 @@ Use standard Markdown image syntax for body images:
 ![image](./image1.jpg)
 ```
 
-If internal numbered subheads should look like normal body text, prefer plain numbered lines such as:
-
-```text
-1，第一个小标题
-```
-
-instead of Markdown headings like:
+For numbered subheads, use `##` heading with `、` separator for better visual distinction in WeChat:
 
 ```markdown
-## 1，第一个小标题
+## 1、第一个小标题
 ```
+
+This renders as a styled h2 heading with a blue left border in WeChat, providing clear visual separation between sections.
 
 ## Suggested publish-ready pattern
 
@@ -73,25 +69,23 @@ summary: 一句话摘要
 cover: ./cover.png
 ---
 
-# 文章标题
-
 ![image](./image1.jpg)
 
 开头第一句直接抛情绪。
 
-1，第一个小标题
+## 1、第一个小标题
 
 这里写正文。
 
-2，第二个小标题
+## 2、第二个小标题
 
 这里写正文。
 
-3，我的操作？
+## 3、我的操作？
 
 这里写态度。
 
-4，明日观察重点：
+## 4、明日观察重点：
 
 （1）观察点一
 
@@ -111,3 +105,10 @@ Avoid these unless the user explicitly wants them:
 - oversized data dumps
 - long theory-heavy paragraphs
 - generic compliance-style endings
+
+## WeChat formatting lessons learned
+
+1. **标题格式**：推荐使用 `## 1、标题` 格式而非纯文本数字编号，在微信中渲染为带样式的二级标题（蓝色左边框），视觉区分度更好
+2. **避免重复标题**：frontmatter 中已有 title 字段，正文不要再用 `# 标题` 重复，否则微信显示会出现两个标题
+3. **段落间距**：每个话题/模块之间需要空行分隔，否则文字混在一起难以阅读
+4. **作者名**：在 frontmatter 的 author 字段设置即可，不要在正文中重复写作者名
