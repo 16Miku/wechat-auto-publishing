@@ -36,9 +36,11 @@
 
 ### 4. 公众号发布
 - 草稿发布流程说明
-- 正式发布流程说明
+- 正式发布流程说明（freepublish 轮询机制）
+- 备用发布脚本 `publish.mjs`（纯 Node.js，零依赖，解决 Bun 兼容性问题）
 - 发布成功判断标准
 - 发布结果归档规范
+- 常见故障排查（IP 白名单、依赖兼容性、AI 生图 404）
 
 ### 5. 自动化与运维
 - `run.sh` 模板
@@ -72,6 +74,7 @@ wechat-auto-publishing-complete/
 └─ templates/
    ├─ article-template.md
    ├─ env.example.txt
+   ├─ publish.mjs              ← 纯 Node.js 零依赖备用发布脚本
    ├─ run.sh
    ├─ cron.example.txt
    ├─ publish-result.example.json
@@ -114,13 +117,15 @@ wechat-auto-publishing-complete/
 
 建议运行环境至少具备：
 
-- `python3`
+- `python3`（如使用 uv 管理 Python，`python` 命令亦可）
 - `node`
 - `npm`
 - `npx`
-- `bun`
+- `bun`（Bun 1.3.x 在 Windows 上可能存在兼容性问题，遇到时可用 Node.js 替代）
 
 如果要完整复现工作流，还建议本地具备对应的内容收集、图片处理和公众号发布能力。
+
+> 注意：AI 生图（Google API）可能需要代理，微信 API 必须直连。两个阶段需分别处理代理设置。
 
 ---
 
@@ -133,7 +138,7 @@ wechat-auto-publishing-complete/
 ```env
 WECHAT_APP_ID=fill_in_valid_value_in_target_environment
 WECHAT_APP_SECRET=fill_in_valid_value_in_target_environment
-GOOGLE_BASE_URL=https://api.ikuncode.cc/
+GOOGLE_BASE_URL=fill_in_valid_value_in_target_environment
 GOOGLE_API_KEY=fill_in_valid_value_in_target_environment
 ```
 
