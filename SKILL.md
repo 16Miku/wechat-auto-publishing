@@ -1,6 +1,6 @@
 ---
 name: wechat-auto-publishing-complete
-description: Use this skill to fully reproduce and operate a local end-to-end WeChat Official Account publishing workflow: prepare the environment, validate dependencies, configure non-sensitive placeholders for credentials, gather source material, draft articles, prepare cover and body images, assemble a WeChat-ready Markdown package, publish to draft, optionally submit for formal publication, poll status, archive outputs, and attach scheduling or alerting. Use whenever the user wants a complete reproducible公众号自动发文 skill with environment setup, templates, runbooks, and execution scaffolding, while keeping all secrets and personal account details outside the skill package.
+description: Use this skill to fully reproduce and operate a local end-to-end WeChat Official Account publishing workflow: prepare the environment, validate dependencies, configure non-sensitive placeholders for credentials, gather source material, draft articles, prepare cover and body images, assemble a WeChat-ready Markdown package, publish to draft, optionally submit for formal publication, poll status, archive outputs, and attach scheduling or alerting. Use whenever the user wants a complete reproducible公众号自动发文 skill with environment setup, templates, runbooks, and execution scaffolding, while keeping all secrets and personal account details outside the skill package. Key real-world findings: freepublish does not always behave like manual platform publishing for homepage visibility, production mode should often default to draft-only, image files must be validated by real format rather than extension alone, and multi-account deployments should use isolated directories.
 ---
 
 # WeChat Auto Publishing Complete
@@ -57,6 +57,7 @@ Read the bundled references depending on what the user is trying to accomplish:
 - `templates/article-template.md` — use as the default publishable article skeleton
 - `templates/env.example.txt` — use as the safe non-secret environment placeholder file
 - `templates/run.sh` — use as a starting point for a local orchestrator script
+- `templates/run.production-example.sh` — use as a more production-ready orchestrator template with gallery, publish mode, and time-slot support
 - `templates/cron.example.txt` — use as a starting point for scheduling
 - `templates/publish-result.example.json` — use as a result artifact template
 - `templates/gallery-config.example.txt` — use as a local gallery config example
@@ -147,6 +148,84 @@ Save result artifacts, logs, identifiers, and remaining gallery state where rele
 If the user wants timed operation, attach a wrapper script and scheduler entry.
 
 Read `references/scheduling-and-alerting.md`.
+
+## Important real-world publishing boundary
+
+### `freepublish` is not always operationally equivalent to manual publishing in the MP backend
+
+In practice, a workflow may successfully:
+- submit draft publication
+- obtain `publish_id`
+- obtain `article_id`
+- obtain `article_url`
+
+but still not behave the same way as manually publishing the draft inside the WeChat Official Account admin console, especially for homepage visibility expectations.
+
+Therefore, the skill must distinguish between:
+- **technical publication success**
+- **platform backend success**
+- **operational visibility success**
+
+## Recommended production modes
+
+### Mode A: `draft_only` (recommended production default)
+
+```text
+auto content generation
+→ auto image preparation
+→ auto draft submission
+→ human publishes in MP backend
+```
+
+Use this mode when homepage visibility and platform-consistent display matter more than full automation.
+
+### Mode B: `full_publish` (testing / exploratory mode)
+
+```text
+auto content generation
+→ auto draft submission
+→ auto freepublish submit
+→ poll result
+→ archive article_url
+```
+
+Use this mode only when the operator explicitly accepts that API publication may not be equivalent to backend manual publication.
+
+## Multi-account deployment principle
+
+When operating multiple public accounts, prefer:
+
+```text
+one account = one working directory = one .env = one title history = one cron entry
+```
+
+This avoids credential confusion, title-history pollution, log mixing, and accidental cross-account publishing.
+
+## Image validity principle
+
+Do not trust file extension alone.
+
+Before publish, validate that images are:
+- present
+- readable
+- non-empty
+- in a real supported format (PNG/JPEG/WebP if supported by the target chain)
+
+If a file is named `cover.png` but is actually HEIF/HEVC, the WeChat API may reject it.
+
+## Writing quality principle
+
+Do not directly inject scraped source titles into the body as-is.
+
+Avoid:
+- raw news-title insertion
+- truncated title fragments ending with `...`
+- media-style prefixes such as `报道：` in final body text
+
+Prefer:
+- title cleaning
+- summary transformation
+- author-tone rewriting
 
 ## Workflow principles
 

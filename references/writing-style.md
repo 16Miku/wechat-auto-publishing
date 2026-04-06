@@ -112,3 +112,32 @@ Avoid these unless the user explicitly wants them:
 2. **避免重复标题**：frontmatter 中已有 title 字段，正文不要再用 `# 标题` 重复，否则微信显示会出现两个标题
 3. **段落间距**：每个话题/模块之间需要空行分隔，否则文字混在一起难以阅读
 4. **作者名**：在 frontmatter 的 author 字段设置即可，不要在正文中重复写作者名
+
+## Writing quality rule (from real workflow experience)
+
+Do not directly paste scraped news titles into the article body.
+
+### Avoid
+
+- raw headline insertion
+- truncated fragments ending with `...`
+- media-report phrasing such as `报道：` left untouched
+- title-like syntax being treated as final paragraph content
+
+### Prefer
+
+1. clean the source title
+2. remove media-style prefixes
+3. understand the event meaning
+4. rewrite in the target author voice
+5. ensure each paragraph reads like a complete paragraph, not a source-material placeholder
+
+### Example
+
+**Weak body sentence:**
+
+`"48小时通牒"与"45天停火协议"挑动市场，周一油价冲高回落，黄金下跌、美股期货转涨，...`
+
+**Better rewritten paragraph:**
+
+`停火预期一出来，市场情绪立刻被带着跑，油价先冲高，随后又回落，黄金和风险资产也跟着来回波动。真正难的不是没有方向，而是消息反复，节奏特别容易做错。`

@@ -1,4 +1,12 @@
-# Example cron entry
+# Example cron entries
 # Replace placeholders before use.
 
+# Single account, basic schedule
 0 8,17 * * * cd <project-dir> && /bin/bash ./run.sh >> ./output/cron.log 2>&1
+
+# Production-recommended draft-only mode
+0 8,17 * * * TZ=Asia/Shanghai WECHAT_AUTO_PUBLISH_MODE=draft_only /root/wechat-auto/run.sh >> /root/wechat-auto/cron.log 2>&1
+
+# Multi-account full_publish example (only if operator explicitly accepts API publication behavior differences)
+0 8,17 * * * TZ=Asia/Shanghai WECHAT_AUTO_PUBLISH_MODE=full_publish /root/wechat-auto/run.sh >> /root/wechat-auto/cron.log 2>&1
+0 7,16 * * * TZ=Asia/Shanghai WECHAT_AUTO_PUBLISH_MODE=full_publish /root/wechat-auto-niugushashou/run.sh >> /root/wechat-auto-niugushashou/cron.log 2>&1

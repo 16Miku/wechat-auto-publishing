@@ -111,3 +111,34 @@ Before inserting images into the article package, check:
 - file is readable
 - image dimensions are valid
 - file is not empty or obviously broken
+
+### Real-format validation (important practical addition)
+
+Do not trust extension alone. Before publish, validate that the actual file signature / MIME is compatible with the expected upload type.
+
+Common bad case:
+- file named `cover.png`
+- actual content is HEIF / HEVC
+- WeChat upload fails with `40113 unsupported file type hint`
+
+### Recommended normalization rule
+
+Before final upload, normalize images into standard formats when needed:
+- cover → PNG or JPEG
+- body images → JPEG preferred
+
+If image provenance is uncertain (mobile export / user-provided / fallback gallery), normalization is strongly recommended.
+
+## Failure grading
+
+### Level 1
+AI image generation fails, but fallback images are valid → continue.
+
+### Level 2
+Body images fail, but cover is valid → continue only if workflow explicitly allows missing body images.
+
+### Level 3
+Cover image invalid and no fallback available → block publication.
+
+### Level 4
+Cover exists but real format invalid → normalize/re-encode, then retry.

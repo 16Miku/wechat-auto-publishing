@@ -165,3 +165,30 @@ If the workflow is being moved to another host, reproduce:
 - the dependency installation steps
 - the file naming conventions
 - the publish success criteria
+
+## Multi-account deployment
+
+For multiple official accounts, use isolated working directories.
+
+Example:
+
+```text
+/root/wechat-auto-a/
+/root/wechat-auto-b/
+```
+
+Each directory should own its own:
+- `.baoyu-skills/.env`
+- `article.md` / article generation scripts
+- `run.sh`
+- `title_history.txt`
+- `cron.log`
+- `output/`
+
+### Why this matters
+
+This avoids:
+- credential confusion
+- title-history pollution
+- log mixing
+- accidental cross-account publishing

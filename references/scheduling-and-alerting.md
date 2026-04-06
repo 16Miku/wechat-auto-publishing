@@ -6,6 +6,16 @@ Use this reference when attaching automation to the workflow.
 
 Allow the article workflow to run on a schedule while keeping failures visible.
 
+## Scheduling modes
+
+### Production recommendation: `draft_only`
+
+Use cron with `draft_only` and let operators manually publish in MP backend. This is recommended when homepage visibility consistency matters.
+
+### Experimental: `full_publish`
+
+Use cron with `full_publish` only when the operator accepts that API publication may not match backend manual publication in homepage visibility.
+
 ## Wrapper script responsibilities
 
 A local wrapper should:
@@ -72,3 +82,12 @@ Alert on:
 ## Scheduler examples
 
 See `templates/cron.example.txt` for a cron-style example and `templates/run.sh` for a wrapper starting point.
+
+### Multi-account cron example
+
+```cron
+0 8,17 * * * TZ=Asia/Shanghai WECHAT_AUTO_PUBLISH_MODE=draft_only /root/wechat-auto/run.sh >> /root/wechat-auto/cron.log 2>&1
+0 7,16 * * * TZ=Asia/Shanghai WECHAT_AUTO_PUBLISH_MODE=full_publish /root/wechat-auto-niugushashou/run.sh >> /root/wechat-auto-niugushashou/cron.log 2>&1
+```
+
+Archive and inspect logs separately per account.

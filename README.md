@@ -19,12 +19,14 @@
 - 运行时环境说明（Python / Node / npm / npx / bun）
 - 本地工作目录与推荐结构说明
 - 安全配置与占位模板
+- 多公众号独立目录结构建议
 
 ### 2. 内容准备
 - 资讯收集与筛选流程
 - 市场角度整理
 - 公众号文章写稿规范
 - Markdown 成稿约定
+- 避免将抓取标题原文直接拼入正文
 
 ### 3. 图片处理
 - 封面图 `cover.png` 生成策略
@@ -33,20 +35,25 @@
 - 用户提供图片模式
 - 自动生成图片模式
 - 图片失败回退与质检规则
+- 图片真实格式校验与标准化要求（防止 HEIF/HEIC 冒充 png/jpg）
 
 ### 4. 公众号发布
 - 草稿发布流程说明
 - 正式发布流程说明（freepublish 轮询机制）
+- 明确说明：`freepublish` 与平台后台手动发布效果不完全等价
+- 推荐生产模式：自动入草稿箱 + 人工在平台手动发布
 - 备用发布脚本 `publish.mjs`（纯 Node.js，零依赖，解决 Bun 兼容性问题）
-- 发布成功判断标准
+- 发布成功判断标准（技术成功 / 平台成功 / 运营可见性成功三层区分）
 - 发布结果归档规范
-- 常见故障排查（IP 白名单、依赖兼容性、AI 生图 404）
+- 常见故障排查（IP 白名单、依赖兼容性、AI 生图 404/401、图片格式错误）
 
 ### 5. 自动化与运维
 - `run.sh` 模板
-- `cron` 示例
+- 更贴近实战的 `run.production-example.sh`
+- `cron` 示例（含多账号、时区、双模式）
 - 失败告警建议
 - 运行手册与交接说明
+- `draft_only` / `full_publish` 双模式说明
 
 ### 6. 安全边界
 - Skill 本身不包含真实敏感配置
@@ -76,6 +83,7 @@ wechat-auto-publishing-complete/
    ├─ env.example.txt
    ├─ publish.mjs              ← 纯 Node.js 零依赖备用发布脚本
    ├─ run.sh
+   ├─ run.production-example.sh ← 更贴近生产环境的脚本模板
    ├─ cron.example.txt
    ├─ publish-result.example.json
    ├─ gallery-config.example.txt
@@ -107,9 +115,9 @@ wechat-auto-publishing-complete/
 3. 使用 `templates/env.example.txt`、`templates/workspace-tree.txt` 搭建本地目录
 4. 按 `references/source-gathering.md` 和 `references/writing-style.md` 准备文章内容
 5. 按 `references/image-strategy.md` 准备封面图与正文图片
-6. 按 `references/publishing.md` 完成草稿发布与正式发布
+6. 按 `references/publishing.md` 完成草稿发布与正式发布判断
 7. 按 `runbook.md` 做每日执行或交接
-8. 如需定时运行，参考 `templates/run.sh` 与 `templates/cron.example.txt`
+8. 如需定时运行，参考 `templates/run.sh`、`templates/run.production-example.sh` 与 `templates/cron.example.txt`
 
 ---
 
