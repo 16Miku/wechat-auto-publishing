@@ -1,144 +1,133 @@
 # Image Strategy
 
-Use this reference when preparing `cover.png`, `image1.jpg`, and `image2.jpg`.
+准备 `cover.png`（或 `cover.jpg`）、`image1.jpg`、`image2.jpg`。
 
 ## Output contract
 
-Use these filenames consistently:
-- `cover.png`
-- `image1.jpg`
-- `image2.jpg`
+统一文件名：
 
-## Cover image
+```text
+cover.png | cover.jpg
+image1.jpg
+image2.jpg
+```
 
-Prefer a dedicated cover-generation path that outputs `cover.png`.
-
-Recommended default characteristics:
-- conceptual style
-- cool palette
-- digital rendering
-- little or no text baked into the generated image
-- aspect suited for WeChat cover use
-
-The article frontmatter should point to:
+frontmatter：
 
 ```yaml
 cover: ./cover.png
 ```
 
-## Body image sources
+正文 Markdown：
 
-Support these sources explicitly:
-1. user-provided images
-2. local gallery images
-3. generated images
+```markdown
+![image](./image1.jpg)
+...
+![image](./image2.jpg)
+```
 
-The operator may choose the preferred order, but the workflow should make the source explicit.
+通道 B（浏览器）不依赖 Markdown 内嵌路径，但**本地包仍应保留同名文件**便于复用与审计。
+
+## 来源矩阵（显式选择，禁止隐式）
+
+| 来源 | 说明 | 典型用途 |
+|------|------|----------|
+| `user_prompt_direct` | 用户给出完整提示词，Agent **直接**调用图像生成工具（如 image_gen），**不**绕 baoyu-image-gen 扩展链路 | 指定风格美女图、定制场景 |
+| `local_gallery` | 本地图库目录抽取 | 稳定存量素材（如 `美女配图/`） |
+| `concept_ai` | 概念/财经插画风 AI 生成 | 封面科技感 |
+| `user_upload` | 用户直接给文件 | 品牌物料 |
+
+运行时在日志/`draft-result.json` 写明 `image_source`。
+
+## 用户提示词直出（实战路径）
+
+当用户提供完整中文/英文提示词并要求「直接生成、不要走 skill 内 baoyu 生图方式」时：
+
+1. 使用当前环境的 **image_gen / 等价生图工具** 连续生成 2 张（可微调构图角度保持同一人设）  
+2. 建议 `aspect_ratio: 16:9`（封面与正文通用；避免未支持的 `2.35:1` 等枚举）  
+3. 保存到当日包：  
+
+```text
+output/YYYY-MM-DD/beauty1.jpg  → 同步为 image1.jpg / 可选封面
+output/YYYY-MM-DD/beauty2.jpg  → 同步为 image2.jpg / 可选封面
+output/YYYY-MM-DD/cover.png    ← 默认可用 beauty1 转 PNG；用户可改为 beauty2
+```
+
+4. 通道 B：`upload_file` 上传到编辑器；封面「从正文选择」对应张  
+
+合规：
+
+- 仅成年人形象；拒绝未成年/色情擦边  
+- 适合公众号：干净、高级、非露骨  
+
+## Cover 默认策略
+
+若无用户指定：
+
+- 概念风、冷色、少文字烘焙进图  
+- 或使用正文首图 / 用户指定第 N 张正文图  
+
+浏览器路径下，**以编辑器封面预览为准**；用户手动改封面后，归档 `cover_note`。
 
 ## Local gallery mode
 
-Recommended gallery layout:
-
 ```text
 <gallery-root>/
-├─ unused/
+├─ unused/   # 或扁平目录如 美女配图/*.jpg
 ├─ used/
 └─ bad/
 ```
 
-### Rules
+规则：
 
-- choose exactly 2 images from `unused/`
-- do not select the same image twice in the same article
-- only allow supported image formats
-- do not mutate gallery state until publish success
-- if publish fails, keep selected images in `unused/`
-- if fewer than 2 valid images remain, stop the gallery branch and report low stock
+- 每篇选 2 张，不重复  
+- 仅允许 `.jpg/.jpeg/.png/.webp`  
+- **发布成功前不移动**到 used（失败则留在 unused）  
+- 库存低于阈值报警  
 
-### Suggested config model
+配置示例见 `templates/gallery-config.example.txt`。
 
-```text
-gallery_enabled = true
-gallery_strategy = random
-gallery_pick_count = 2
-gallery_consume_mode = move_to_used
-gallery_low_stock_threshold = 20
-gallery_allowed_ext = .jpg,.jpeg,.png,.webp
-```
+## AI 概念生图（可选 baoyu 链路）
 
-## Generation fallback
+若走 `baoyu-image-gen` / `baoyu-cover-image`：
 
-If image generation fails, prefer one of these fallback paths if configured:
-- local gallery
-- user-provided images
-- publish without body images only if that is an explicit workflow option
+- 注意代理 API 模型名是否 404  
+- 生图阶段可代理；上传微信阶段须直连  
+- 失败分级见文末  
 
-## AI 生图实践经验
+## 尺寸建议
 
-### Google Gemini 模型选择
+| 用途 | 建议 |
+|------|------|
+| 封面 | 16:9 或接近宽屏；微信后台可再裁 |
+| 正文 | 16:9 或 3:2 |
+| 体积 | 通常 < 4MB；接口上限约 10MB |
 
-- EXTEND.md 中配置的默认模型为 `gemini-3.1-flash-image-preview`
-- 如果使用代理 API（如 `api.ikuncode.cc`），需确认代理支持的模型列表
-- 不同模型名称格式不同，错误的模型名会返回 404 错误
-- 建议在 EXTEND.md 中明确记录当前使用的模型名，方便排查
+## 质检门禁
 
-### 代理与直连
+发布前检查：
 
-AI 生图和微信发布对网络环境的要求不同：
+- [ ] 文件存在且非空  
+- [ ] 可解码  
+- [ ] **真实格式**与扩展名一致（防 HEIF 伪装 → 微信 40113）  
+- [ ] 通道 B 上传后 `src` 含 `mmbiz.qpic.cn` 且宽高 > 0  
 
-- AI 生图调用 Google API 时可能需要代理才能访问
-- 生成图片后上传到微信时必须直连（微信 API 不能走代理）
-- 建议在生图和发布两个阶段分别处理代理设置：
+规范化：封面 PNG/JPEG；正文优先 JPEG。
 
-```bash
-# 生图阶段：开启代理
-export https_proxy=http://127.0.0.1:7890
+## 失败分级
 
-# 发布阶段：关闭代理
-unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY
-```
+| 级别 | 情况 | 动作 |
+|------|------|------|
+| L1 | AI 失败但有图库/用户图 | 继续 |
+| L2 | 无正文图但有封面 | 仅当流程明确允许 |
+| L3 | 无封面且无回退 | **阻断** |
+| L4 | 格式伪合法 | 重编码后重试 |
 
-### 图片尺寸建议
+## 与双通道的关系
 
-- 封面图推荐 2.35:1 宽屏比例（适合微信公众号封面展示）
-- 正文配图推荐 3:2 比例
-- 生成的图片通常 2-4MB，微信 API 上传限制为 10MB，一般不会超限
-
-## Additional quality gate
-
-Before inserting images into the article package, check:
-- file exists
-- file is readable
-- image dimensions are valid
-- file is not empty or obviously broken
-
-### Real-format validation (important practical addition)
-
-Do not trust extension alone. Before publish, validate that the actual file signature / MIME is compatible with the expected upload type.
-
-Common bad case:
-- file named `cover.png`
-- actual content is HEIF / HEVC
-- WeChat upload fails with `40113 unsupported file type hint`
-
-### Recommended normalization rule
-
-Before final upload, normalize images into standard formats when needed:
-- cover → PNG or JPEG
-- body images → JPEG preferred
-
-If image provenance is uncertain (mobile export / user-provided / fallback gallery), normalization is strongly recommended.
-
-## Failure grading
-
-### Level 1
-AI image generation fails, but fallback images are valid → continue.
-
-### Level 2
-Body images fail, but cover is valid → continue only if workflow explicitly allows missing body images.
-
-### Level 3
-Cover image invalid and no fallback available → block publication.
-
-### Level 4
-Cover exists but real format invalid → normalize/re-encode, then retry.
+| 步骤 | API | Browser |
+|------|-----|---------|
+| 本地生成/选型 | 相同 | 相同 |
+| 上传 | material API | 编辑器「图片→本地上传」 |
+| 封面 | thumb_media_id | 从正文选择 / 图库 |
+| 替换 | 重新 draft | 删 img 节点再 upload_file |

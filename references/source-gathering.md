@@ -50,3 +50,8 @@ The drafting step should receive:
 - a filtered source list
 - a short market judgment
 - one or two primary directions worth expanding
+- a **fact checklist** (3–5 bullets with source name + number) so the draft cannot invent closes or flow data
+
+## Evidence rule
+
+If a number will appear in the article (index %, turnover, net inflow, named limit-up stocks), it must come from this gathering step or a fresh re-fetch—not from model memory alone.

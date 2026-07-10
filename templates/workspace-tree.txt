@@ -5,12 +5,21 @@
 │  │  └─ EXTEND.md
 │  └─ baoyu-cover-image/
 │     └─ EXTEND.md
-├─ article.md
+├─ 美女配图/                      # optional local gallery
+│  └─ *.jpg
+├─ article.md                     # optional root copy
 ├─ cover.png
 ├─ image1.jpg
 ├─ image2.jpg
 ├─ output/
-│  ├─ full_publish_result.json
+│  ├─ YYYY-MM-DD/
+│  │  ├─ article.md
+│  │  ├─ cover.png
+│  │  ├─ image1.jpg
+│  │  ├─ image2.jpg
+│  │  ├─ draft-result.json
+│  │  └─ publish-status.json
+│  ├─ full_publish_result.json    # API full pipeline
 │  ├─ publish_log.jsonl
 │  └─ cron.log
 └─ run.sh

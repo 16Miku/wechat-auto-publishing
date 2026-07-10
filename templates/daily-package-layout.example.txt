@@ -1,0 +1,18 @@
+# 推荐：按自然日组装可发布包（通道 A/B 共用）
+
+output/YYYY-MM-DD/
+├─ article.md                 # frontmatter: title, author, summary, cover
+├─ cover.png                  # 或 cover.jpg
+├─ cover.jpg                  # 可选
+├─ image1.jpg                 # 正文首图
+├─ image2.jpg                 # 正文尾图
+├─ beauty1.jpg                # 可选：用户提示词直出原图 1
+├─ beauty2.jpg                # 可选：用户提示词直出原图 2
+├─ draft-result.json          # 草稿成功：media_id 或 appmsgid
+├─ draft-preview.png          # 可选：编辑器截图
+├─ publish-verify-qr.png      # 可选：扫码验证截图
+├─ publish-status.json        # 正式发表结果
+└─ draft-beauty-preview.png   # 可选：换图后截图
+
+# 最小集合（必须）
+#   article.md + cover.* + image1.jpg + image2.jpg（若启用正文图）

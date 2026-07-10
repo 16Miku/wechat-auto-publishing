@@ -15,6 +15,22 @@ Produce an article that is readable inside WeChat, emotionally direct, and visua
 - include a clear tomorrow-watchlist section
 - preserve a light interaction-oriented ending
 
+## Fact vs opinion（强制）
+
+| 类型 | 要求 | 示例 |
+|------|------|------|
+| **事实** | 必须有公开检索来源（交易所收盘、主流财经媒体） | 「科创50涨8.41%」「成交额约2.93万亿」 |
+| **约数** | 允许四舍五入，但需接近原文 | 「放量近3500亿」← 原文3497亿 |
+| **观点** | 明确是态度/仓位/节奏，禁止伪装成行情数据 | 「别追最热」「仓位五到六成」 |
+
+禁止：
+
+- 无来源编造涨跌幅、资金流、点位  
+- 把抓取标题原文硬塞进正文  
+- 用过期交易日数据假装「今日盘中」而不说明日期  
+
+推荐写稿前在草稿备注或对话中列出 3–5 条「可核对事实」。
+
 ## Title guidance
 
 Prefer short, emotionally punchy titles when the account style supports it.

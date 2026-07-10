@@ -1,106 +1,162 @@
 # WeChat Auto Publishing Runbook
 
-Use this runbook when operating or handing off the workflow.
+操作员 / Agent 交接用清单。支持 **API** 与 **Chrome 浏览器** 双通道。
+
+## 0. 每次开跑先选通道
+
+```text
+publish_channel = api | browser | hybrid
+publish_mode    = draft_only | full_publish
+approval_gate   = required（默认）
+```
+
+- 生产默认：`hybrid` 或 `browser` + `draft_only` + 人工批准后再发  
+- 仅当操作员接受 freepublish 可见性差异时，才用 API `full_publish`  
+
+---
 
 ## 1. Fresh machine checklist
 
-- [ ] `python3`, `node`, `npm`, `npx`, `bun` are installed
-- [ ] the required local publishing skill/tool exists
-- [ ] the Markdown dependency chain is installed
-- [ ] `<project-dir>/.baoyu-skills/.env` exists in the target environment
-- [ ] real secrets are supplied outside the skill package
-- [ ] WeChat allowlist prerequisites are satisfied
-- [ ] image-service access is available if image generation is enabled
+### 通用
+
+- [ ] `python`/`python3`、`node`、`npm`/`npx` 可用（Bun 可选）  
+- [ ] 工作目录与 `output/YYYY-MM-DD` 约定清楚  
+- [ ] Skill 包内无真实密钥  
+- [ ] 目标环境 `.baoyu-skills/.env` 已填（仅本机）  
+
+### 通道 A（API）
+
+- [ ] `WECHAT_APP_ID` / `WECHAT_APP_SECRET` 有效  
+- [ ] IP 白名单已加（以 40164 报错 IP 为准）  
+- [ ] `node templates/publish.mjs` 或 baoyu API 脚本可跑  
+- [ ] 调微信 API 时已清代理  
+
+### 通道 B（Chrome）
+
+- [ ] Chrome 已登录 `mp.weixin.qq.com` 目标号  
+- [ ] Chrome DevTools MCP `list_pages` 可见公众号页  
+- [ ] 知悉正式发表可能要**管理员扫码**  
+- [ ] 阅读 `references/browser-chrome-publish.md`  
+
+---
 
 ## 2. Daily execution checklist
 
-- [ ] gather and filter source material
-- [ ] produce the market-angle summary
-- [ ] draft the article from the template
-- [ ] prepare `cover.png`
-- [ ] prepare `image1.jpg` and `image2.jpg` if enabled
-- [ ] verify frontmatter and file paths
-- [ ] 发布前确认代理设置（生图需要代理，发布需要直连）
-- [ ] publish to draft
-- [ ] record `media_id`
-- [ ] optionally publish formally
-- [ ] 发布后检查 `output/full_publish_result.json` 中的 `publish_status` 是否为 0
-- [ ] archive outputs
+### 内容
+
+- [ ] 采集并过滤资讯（事实可核对）  
+- [ ] 压缩市场角度  
+- [ ] 按模板写稿 + frontmatter  
+- [ ] 区分事实句 / 观点句  
+
+### 图片
+
+- [ ] 确定来源：`user_prompt_direct` / gallery / concept_ai / upload  
+- [ ] 产出 `cover.*`、`image1.jpg`、`image2.jpg`  
+- [ ] 真实格式校验（非 HEIF 伪装）  
+- [ ] 文件落入 `output/YYYY-MM-DD/`  
+
+### 草稿
+
+**API：**
+
+- [ ] 清代理后发布  
+- [ ] 拿到 `media_id`  
+- [ ] 写 `draft-result.json`  
+
+**Browser：**
+
+- [ ] 新的创作 → 文章  
+- [ ] 标题/正文 ProseMirror **未写混**  
+- [ ] 正文字数 > 0  
+- [ ] 上传 2 张正文图  
+- [ ] 封面从正文选择（或用户已手改）  
+- [ ] 保存草稿，记录 `appmsgid`  
+- [ ] 写 `draft-result.json`  
+
+### 批准门禁
+
+- [ ] 向用户展示标题/摘要/草稿 ID/配图说明  
+- [ ] **等待明确批准**（默认）  
+
+### 正式发表
+
+**API full_publish：**
+
+- [ ] freepublish + 轮询  
+- [ ] 记录 `publish_id` / `article_url`  
+- [ ] 声明仅技术成功，除非已运营验收  
+
+**Browser：**
+
+- [ ] 发表 → 声明/群发 → 继续发表  
+- [ ] 用户扫码（若弹出）  
+- [ ] **发表记录**出现「已发表」  
+- [ ] 写 `publish-status.json`  
+
+---
 
 ## 3. Failure checklist
 
-If publish fails:
-- [ ] preserve logs
-- [ ] preserve the article package
-- [ ] do not consume gallery images if success was not confirmed
-- [ ] record the failed step and error summary
-- [ ] send an alert if automation is enabled
+- [ ] 保留日志、截图、当日包  
+- [ ] 未确认成功前不消耗图库 used  
+- [ ] 记录失败步骤与通道  
+- [ ] 浏览器路径避免连点发表浪费群发次数  
+- [ ] 需要时告警  
 
-## 4. 常见故障排查
+---
 
-### 微信 API 报 40164（IP 不在白名单）
+## 4. 故障速查
 
-以错误信息中返回的 IP 为准添加白名单，不要依赖 `curl ifconfig.me` 的结果（代理环境下出口 IP 可能不同）。
+| 问题 | 处理 |
+|------|------|
+| API 40164 | 按错误 IP 加白 |
+| Bun / simple-xml 报错 | `node publish.mjs` |
+| 生图 404/401 | 换模型名或走提示词直出/图库 |
+| 40113 图片类型 | 重编码 JPEG/PNG |
+| 标题变成全文 | 修 ProseMirror 写入目标 |
+| 正文字数 0 | 写入 `.rich_media_content .ProseMirror` |
+| freepublish 无主页 | 改浏览器群发路径 |
+| 卡在微信验证 | 管理员扫码 |
+| 运营规则答题 | 账号方完成学习 |
 
-### baoyu-post-to-wechat 报 SyntaxError（simple-xml-to-json）
+详见 `references/publishing.md`、`references/browser-chrome-publish.md`。
 
-Bun 与 `simple-xml-to-json` 包存在兼容性问题。解决方案：
-- 使用 `templates/publish.mjs` 备用脚本：`node templates/publish.mjs`
-- 或升级 Bun 到最新版本后重试
+---
 
-### AI 生图返回 404 或 401
+## 5. 推荐日常模式
 
-检查 `.baoyu-skills/baoyu-image-gen/EXTEND.md` 或 `.baoyu-skills/baoyu-cover-image/EXTEND.md` 中的模型名是否被代理 API 支持。不同代理支持的模型列表可能不同。AI 生图失败时优先使用备用图片继续发布流程，不要让图片生成失败阻断草稿创建。
+### 模式 P1（推荐生产）
 
-### 图片上传报 40113（unsupported file type hint）
+1. 采集 + 写稿 + 生图  
+2. Browser 或 API 入草稿  
+3. 人工改封面/审文  
+4. 批准后 Browser 发表 + 扫码  
+5. 发表记录归档  
 
-检查封面/正文图片的真实格式是否与扩展名一致。`.png` 文件名可能实际包含 HEIF 数据，需要重新编码为标准 PNG/JPEG。
+### 模式 P2（API 实验）
 
-### `freepublish` 成功但文章未按预期显示在主页
+1. 采集 + 写稿 + 生图  
+2. API draft + freepublish  
+3. 归档 URL（接受可见性差异）  
 
-这属于 `freepublish` 行为边界，不一定是脚本 bug。建议生产环境使用 `draft_only` 模式，人工在公众号后台手动发布。
+### 模式 P3（仅草稿）
 
-## 5. Recommended daily operating modes
+1. 到草稿为止  
+2. 运营在后台自行点发表  
 
-### Production mode (recommended)
+---
 
-1. Gather sources
-2. Generate article
-3. Prepare images
-4. Publish to draft
-5. Open MP backend
-6. Review and manually publish from draft
+## 6. Multi-account
 
-### Fully automated experimental mode
+一号一目录：独立 `.env`、title 历史、cron、output。  
+Browser 路径：一号一 Chrome 配置/登录态，避免串号。
 
-1. Gather sources
-2. Generate article
-3. Prepare images
-4. Publish to draft
-5. Auto-submit `freepublish`
-6. Poll result
-7. Archive `article_url`
-
-> Warning: successful API publication does not always guarantee the same homepage visibility behavior as manual backend publishing.
-
-## 6. Multi-account practice
-
-Use isolated working directories per account.
-
-Example:
-- `/root/wechat-auto`
-- `/root/wechat-auto-niugushashou`
-
-Keep isolated:
-- `.baoyu-skills/.env`
-- `title_history.txt`
-- logs
-- cron entry
+---
 
 ## 7. Distribution checklist
 
-Before sharing the skill package:
-- [ ] verify no real secrets are embedded
-- [ ] verify no private account identifiers are exposed unintentionally
-- [ ] verify example files only contain placeholders
-- [ ] verify the package is self-explanatory for a new machine setup
+- [ ] 无真实密钥 / cookie / token  
+- [ ] 示例仅为 placeholder  
+- [ ] 双通道文档可独立跑通  
+- [ ] runbook 与 browser checklist 同步  

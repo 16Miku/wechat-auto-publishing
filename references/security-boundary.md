@@ -19,8 +19,15 @@ The skill must not include:
 - real secrets
 - real account identifiers unless explicitly required by the user
 - cookies, sessions, tokens, access keys, or private URLs
+- Chrome profile dumps, mp backend `token=` query strings, or QR ticket URLs
 - personal workspace details that are not necessary for reuse
 - embedded secret values in templates or shell scripts
+
+## Browser channel extra rules
+
+- Login state must live only in the operator’s local Chrome profile
+- Agents may drive an already-open session via DevTools MCP, but must not export cookies into the skill package
+- Archive files may store `appmsgid` / publish timestamps; redact long-lived tokens from saved URLs
 
 ## Safe example policy
 
