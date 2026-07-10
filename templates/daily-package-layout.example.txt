@@ -11,9 +11,12 @@ output/YYYY-MM-DD/
 ├─ draft-result.json          # 草稿成功：media_id 或 appmsgid
 ├─ draft-preview.png          # 可选：编辑器截图
 ├─ wechat-verify-qr.png       # 可选：当前微信验证二维码（推飞书用）
+├─ {slug}-wechat-verify-qr.png  # 推荐：按账号区分
 ├─ publish-verify-qr.png      # 可选：整页扫码截图（备查）
 ├─ feishu-notify.json         # 可选：飞书推送 message_id 归档
-├─ publish-status.json        # 正式发表结果
+├─ publish-status.json        # 正式发表结果（单号时）
+├─ {slug}-draft-result.json   # 推荐多账号
+├─ {slug}-publish-status.json # 推荐多账号
 └─ draft-beauty-preview.png   # 可选：换图后截图
 
 # 最小集合（必须）

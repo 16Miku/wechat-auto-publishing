@@ -61,6 +61,16 @@ cover: ./cover.png
 ---
 ```
 
+### Author 字段（多账号）
+
+| 规则 | 说明 |
+|------|------|
+| 默认 | `author` = **当前登录公众号显示名**（Browser 顶栏名 / 该号配置的 default_author） |
+| 禁止 | 换号后仍写上一号的作者名 |
+| 例外 | 用户明确指定笔名时使用指定值 |
+
+详见 `references/multi-account.md`。
+
 Use standard Markdown image syntax for body images:
 
 ```markdown

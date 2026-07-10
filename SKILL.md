@@ -53,6 +53,7 @@ description: >
 | `references/image-strategy.md` | 封面/正文图策略（含美女配图直出） |
 | `references/publishing.md` | **双通道**发布总览与成功判定 |
 | `references/browser-chrome-publish.md` | **通道 B 逐步操作手册（核心）** |
+| `references/multi-account.md` | **多账号切换自检、作者规则、跨号复用** |
 | `references/feishu-qr-notify.md` | **飞书推送微信验证二维码（已实测）** |
 | `references/session-practices.md` | 实战沉淀一页纸汇总 |
 | `references/scheduling-and-alerting.md` | 定时与告警 |
@@ -96,6 +97,7 @@ approval_gate   = required（默认）| auto（仅实验）
 
 - 通道 A：AppID/Secret、IP 白名单、发布脚本依赖  
 - 通道 B：本机 Chrome 已登录 `mp.weixin.qq.com`，Chrome DevTools MCP 可 `list_pages`  
+- **多账号**：先自检当前号显示名与 `token`（`references/multi-account.md`）  
 
 ### Step 2: 采集素材
 
@@ -111,6 +113,7 @@ approval_gate   = required（默认）| auto（仅实验）
 
 - 情绪开头、短段、操作态度、明日观察、轻互动结尾  
 - 区分「事实句」与「观点句」  
+- **author 默认 = 当前公众号显示名**（换号后禁止沿用上一号）  
 
 ### Step 4: 配图
 
@@ -206,14 +209,17 @@ output/YYYY-MM-DD/
 7. **代理策略三分**：生图可代理；**微信 API 与飞书 lark-cli 建议直连**（飞书带代理易 token 超时）。  
 8. **`lark-cli --image` 必须相对路径**，绝对路径会被拒绝。  
 9. **禁止复用过期 QR 截图**做授权；每次用当前弹窗新码。  
+10. **换号必自检**：顶栏名 + token + 作者；归档按账号 slug 分文件。  
+11. **发表弹窗会叠层**：「继续发表/继续群发」文案不一；**微信验证**优先级最高。  
 
-快速索引：`references/session-practices.md`。
+快速索引：`references/session-practices.md`、`references/multi-account.md`。
 
 ## Reproduction checklist
 
 - [ ] 双通道文档齐全且无真实密钥  
 - [ ] 通道 A 能 draft（有 media_id）  
 - [ ] 通道 B 能 list_pages 并打开草稿编辑器  
+- [ ] 多账号自检与作者规则可用  
 - [ ] 写稿/生图/包结构约定明确  
 - [ ] 批准门禁写进 runbook  
 - [ ] 扫码验证与发表记录核对步骤明确  

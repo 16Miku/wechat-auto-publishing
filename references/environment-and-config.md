@@ -208,7 +208,9 @@ If the workflow is being moved to another host, reproduce:
 
 ## Multi-account deployment
 
-For multiple official accounts, use isolated working directories.
+### API / long-running automation
+
+Use isolated working directories per account.
 
 Example:
 
@@ -225,6 +227,18 @@ Each directory should own its own:
 - `cron.log`
 - `output/`
 
+### Browser (same Chrome, switch account in MP)
+
+Same project directory is OK for short runs, but Agent **must**:
+
+1. Re-read top-bar account display name  
+2. Re-read URL `token=`  
+3. Confirm with operator  
+4. Set `#author` to current display name  
+5. Archive as `{slug}-draft-result.json` / `{slug}-publish-status.json`  
+
+Full checklist: `references/multi-account.md`.
+
 ### Why this matters
 
 This avoids:
@@ -232,3 +246,4 @@ This avoids:
 - title-history pollution
 - log mixing
 - accidental cross-account publishing
+- wrong author name after switching OA

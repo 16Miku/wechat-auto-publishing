@@ -17,19 +17,34 @@
 
 见：`publishing.md`、`browser-chrome-publish.md`。
 
-## 2. 编辑器 DOM 铁律
+## 2. 多账号自检（换号后必做）
+
+见完整版：`multi-account.md`。
+
+```text
+list_pages → 打开 mp 首页/草稿箱
+  → 读顶栏账号显示名
+  → 读 URL token=
+  → 与用户确认「当前是 {name}」
+  → #author = 当前显示名（禁止沿用上一号）
+  → 归档用 {slug}-publish-status.json
+```
+
+同文可跨号复用标题/正文/本地图；**不可**复用 appmsgid、过期 QR、他号发表记录。
+
+## 3. 编辑器 DOM 铁律
 
 | 区域 | 选择器 | 用途 |
 |------|--------|------|
 | 标题 | `#title` + `.title-editor__input .ProseMirror` | 短标题 ≤64 字 |
 | 正文 | `.rich_media_content .ProseMirror` | 唯一正文写入点 |
-| 作者 | `#author` | 显示名 |
+| 作者 | `#author` | **当前号显示名** |
 | 摘要 | `#js_description` | ≤120 字 |
 
 **禁止**对标题 ProseMirror `selectAll` 后灌入全文。  
 校验：侧栏「正文字数」> 0，且 `#title` 长度合理。
 
-## 3. 配图实战
+## 4. 配图实战
 
 1. 用户完整提示词 → **直接** `image_gen`（可不走 baoyu 扩展链路）  
 2. 建议 `aspect_ratio: 16:9`  
@@ -40,7 +55,7 @@
 
 见：`image-strategy.md`。
 
-## 4. 写稿与事实
+## 5. 写稿与事实
 
 - 指数涨跌、成交额、净流入等必须来自检索  
 - 观点句（仓位、别追高等）不得伪装成行情事实  
@@ -48,27 +63,37 @@
 
 见：`writing-style.md`、`source-gathering.md`。
 
-## 5. 正式发表弹窗链（Browser）
+## 6. 正式发表弹窗叠层（Browser，以实测为准）
+
+弹窗可能**同时存在或乱序出现**，不要假设只有一条直线。建议状态机：
 
 ```text
-发表
-  → 创作来源（无需声明并发表 / 去声明）
-  → 群发通知 / 今日剩余次数
-  → 对话框「发表」
-  → 「继续发表」
-  → 微信验证二维码        ← 可截图推飞书
-  → （可能）运营规则答题
-  → 发表记录「已发表」
+点顶栏「发表」
+  → [可选] 创作来源：无需声明并发表 | 去声明
+  → 群发设置：群发通知 / 今日剩余次数 / 定时
+  → 对话框内「发表」
+  → [可选] 「继续发表」或「继续群发」
+  → [可选] 运营规则学习「开始答题」（账号方完成，Agent 不代答）
+  → [可选] 「未授权切换账号」→ 仅点「我知道了」
+  → 【关键阻断】微信验证 + 二维码  → 截码推飞书
+  → 用户扫码后：发表记录「已发表」
 ```
 
-## 6. 飞书推送验证码（已测通）
+**优先级**：只要页面出现 `微信验证` / `微信二维码`，立即停自动点击、截码推送；其它提示可先关「我知道了」，但不要关验证框。
+
+按钮文案可能是「继续发表」或「继续群发」，按可见主按钮点。
+
+## 7. 飞书推送验证码（已测通）
 
 ```text
 检测「微信验证」
-  → take_screenshot(QR uid) → output/.../wechat-verify-qr.png
+  → take_screenshot(uid=微信二维码 img) 优先   # 清晰可扫
+  → 可选：再截整页作对照
+  → 落盘 output/.../ {slug}-wechat-verify-qr.png
   → 清代理
-  → lark-cli bot 发文字 + --image 相对路径
-  → 手机飞书扫码
+  → lark-cli 发文字（含账号名+标题）+ --image 相对路径
+  → 记录 text/image message_id 到 publish-status
+  → 手机飞书扫码 → 回复「已扫码」→ 核对本号发表记录
 ```
 
 | 要点 | 内容 |
@@ -76,12 +101,14 @@
 | CLI | `lark-cli im +messages-send --as bot` |
 | 收件人 | `--user-id ou_xxx` 或 `--chat-id oc_xxx` |
 | 图片路径 | **仅相对 cwd**，禁绝对路径与 `..` |
+| 截图 | **节点截图优先**；整页可选 |
 | 代理 | 发飞书前必须清空，否则 token 易超时 |
 | 时效 | 必须发**当前**弹出的码，禁止复用历史截图授权 |
+| 归档 | `feishu_qr_notify.message_id` 写入账号侧 status 文件 |
 
 见：`feishu-qr-notify.md`、模板 `feishu-qr-notify.example.*`。
 
-## 7. 代理策略总表
+## 8. 代理策略总表
 
 | 阶段 | 代理 |
 |------|------|
@@ -90,36 +117,38 @@
 | 飞书 lark-cli | **建议直连**（实测代理易超时） |
 | Chrome 打开 mp 后台 | 按本机网络习惯 |
 
-## 8. 批准门禁话术
+## 9. 批准门禁话术
 
 Agent 在正式发表前应停住，并展示：
 
+- **当前账号显示名**  
 - 标题 / 摘要 / 草稿 ID  
 - 包路径 / 封面说明  
 - 通道与风险（扫码、群发次数）  
 
 用户明确「批准发布 / 可以发表」后再点发表。  
-扫码后用户可回「已扫码」触发核对。
+扫码后用户可回「已扫码」触发**本号**发表记录核对。
 
-## 9. 归档最小集
+## 10. 归档最小集
 
 ```text
 output/YYYY-MM-DD/
   article.md
   cover.* image1.jpg image2.jpg
-  draft-result.json
-  publish-status.json
-  wechat-verify-qr.png          # 可选
+  {slug}-draft-result.json
+  {slug}-publish-status.json
+  {slug}-wechat-verify-qr.png   # 可选
   feishu-notify.json            # 可选
 ```
 
 `publish-status` 应区分：
 
+- `account` / `account_slug` / `author`  
 - `technical_success` / `platform_success` / `operational_success`  
 - `channel`: api | browser  
-- `feishu_qr_notify` 块（若启用）  
+- `feishu_qr_notify` 块（若启用，含 message_id）  
 
-## 10. 故障速查（高频）
+## 11. 故障速查（高频）
 
 | 问题 | 动作 |
 |------|------|
@@ -130,9 +159,11 @@ output/YYYY-MM-DD/
 | freepublish 无主页感 | 改 Browser 群发 |
 | 飞书 token 超时 | 清代理重试 |
 | 扫码图发不出 | 相对路径 + bot ready + 可用范围 |
+| 错号 / 旧作者 | multi-account 自检 |
 
-## 11. 明确不做
+## 12. 明确不做
 
 - Skill 内不存真实 AppSecret / cookie / ticket  
 - 不无人值守自动群发（除非书面接受）  
 - 不把过期 QR 当有效授权  
+- 不代答「运营规则学习」题目  

@@ -7,14 +7,15 @@
 ## 目标流程
 
 ```text
-浏览器点「继续发表」
-  → 检测到「微信验证」弹窗
-  → 截取二维码图片（优先只截 QR 节点）
-  → 保存到 output/YYYY-MM-DD/wechat-verify-qr.png
+浏览器点「继续发表」/「继续群发」
+  → 检测到「微信验证」弹窗（叠层时优先处理此项）
+  → 截取二维码图片（优先只截 QR 节点；可选整页对照）
+  → 保存到 output/YYYY-MM-DD/{account_slug}-wechat-verify-qr.png
   → 清除代理环境变量
-  → lark-cli 以 bot 发说明文字 + 图片到操作员飞书
+  → lark-cli 以 bot 发说明文字（含账号名+标题）+ 图片到操作员飞书
+  → 记录 message_id 到 {slug}-publish-status.json
   → 等待用户扫码（或回复「已扫码」）
-  → 核对发表记录「已发表」
+  → 在本号发表记录核对「已发表」
 ```
 
 ## 可行性结论（实测）
@@ -107,25 +108,26 @@ Bot 需具备发消息与上传图片相关 scope（如 `im:message`、`im:resou
 
 ## 截取二维码（按推荐顺序）
 
-### 方式 A：只截 QR 图片节点（推荐）
+### 方式 A：只截 QR 图片节点（推荐，已实测）
 
 1. snapshot 找到 `微信二维码` 对应 uid  
 2. `take_screenshot` 传入该 `uid`，`filePath` 写到当日包：  
 
 ```text
-output/YYYY-MM-DD/wechat-verify-qr.png
+output/YYYY-MM-DD/{account_slug}-wechat-verify-qr.png
 ```
 
-优点：图干净、手机易扫。
+优点：图干净、手机易扫。  
+文字说明里务必带上**当前账号显示名**，避免多号并存时扫错语境。
 
-### 方式 B：整页 / 视口截图
+### 方式 B：整页 / 视口截图（可选对照）
 
 ```text
-take_screenshot → output/YYYY-MM-DD/publish-verify-qr.png
+take_screenshot → output/YYYY-MM-DD/{account_slug}-publish-verify-full.png
 ```
 
-优点：实现简单。  
-缺点：码偏小；可后处理中心区域裁剪（见模板脚本思路）。
+优点：实现简单、方便排查 UI。  
+缺点：码偏小；**推飞书时仍以方式 A 为主**，整页可作第二条可选消息。
 
 ### 方式 C：下载 `safeqrcode` URL
 
@@ -243,11 +245,13 @@ lark-cli im +messages-send --as bot \
 
 ## Agent 执行清单（复制即用）
 
+- [ ] 当前账号显示名已确认（多账号场景）  
 - [ ] `FEISHU_QR_NOTIFY_ENABLED` 且 open_id/chat_id 已配置  
 - [ ] `lark-cli auth status` → bot ready  
 - [ ] 发表流程到达「微信验证」  
-- [ ] 截取 QR → 当日包路径  
+- [ ] **节点截图** QR → `{slug}-wechat-verify-qr.png`  
 - [ ] 清代理  
-- [ ] 发文字 + 发图成功（ok: true）  
+- [ ] 发文字（含账号+标题）+ 发图成功（ok: true）  
+- [ ] 写入 feishu_qr_notify.message_id  
 - [ ] 提示用户手机扫码  
-- [ ] 核对「已发表」或超时重拉码  
+- [ ] **本号**发表记录核对「已发表」或超时重拉码  

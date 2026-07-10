@@ -60,6 +60,7 @@ wechat-auto-publishing-complete/
 │  ├─ image-strategy.md
 │  ├─ publishing.md                 ← 双通道总览
 │  ├─ browser-chrome-publish.md     ← 通道 B 详细手册
+│  ├─ multi-account.md              ← 多账号自检 / 作者 / 跨号复用
 │  ├─ feishu-qr-notify.md           ← 飞书推送微信验证码
 │  ├─ session-practices.md          ← 实战沉淀汇总
 │  ├─ scheduling-and-alerting.md
@@ -103,10 +104,12 @@ wechat-auto-publishing-complete/
 1. Browser 编辑器有两个 ProseMirror：**标题区 ≠ 正文区**  
 2. 封面稳定做法：先插入正文图 →「从正文选择」  
 3. 正式发表常要 **管理员微信扫码**，Agent 不能代替；可 **截码推飞书** 手机扫  
-4. 发飞书前 **清代理**；`lark-cli --image` 只用 **相对路径**  
-5. `freepublish` 成功 ≠ 后台手动发表的主页效果  
-6. 图片看真实编码，不看扩展名  
-7. 硬行情数据必须可检索，观点句不要伪装成行情  
+4. 发飞书前 **清代理**；`lark-cli --image` 只用 **相对路径**；**节点截图优先**  
+5. **换号自检**：顶栏名 + token；**作者 = 当前号显示名**  
+6. 发表弹窗会叠层；**微信验证优先级最高**  
+7. `freepublish` 成功 ≠ 后台手动发表的主页效果  
+8. 图片看真实编码，不看扩展名  
+9. 硬行情数据必须可检索，观点句不要伪装成行情  
 
 ---
 

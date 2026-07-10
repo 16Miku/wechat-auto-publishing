@@ -6,10 +6,11 @@
 
 ## 前置条件
 
-1. 本机 Google Chrome 已打开并登录目标公众号后台  
+1. 本机 Google Chrome 已打开并登录**目标**公众号后台  
 2. Agent 侧 Chrome DevTools MCP 已连接，且 `list_pages` 能看到 `mp.weixin.qq.com` 标签  
-3. 当日包已就绪：`article.md`、`cover.*`、`image1.jpg`、`image2.jpg`（路径用绝对路径上传）  
-4. 操作员知悉：正式发表可能弹出**管理员扫码验证**  
+3. **多账号自检已通过**（顶栏账号名 + URL `token` + 用户确认）— 见 `multi-account.md`  
+4. 当日包已就绪：`article.md`、`cover.*`、`image1.jpg`、`image2.jpg`（路径用绝对路径上传）  
+5. 操作员知悉：正式发表可能弹出**管理员扫码验证**  
 
 ### 连接自检
 
@@ -17,6 +18,8 @@
 1. chrome_devtools.list_pages
 2. 确认存在含 mp.weixin.qq.com 的 page
 3. 若无：让用户先在 Chrome 打开 https://mp.weixin.qq.com 并登录
+4. 读顶栏账号显示名 + URL token= ，确认是目标号
+5. 将 #author 设为该显示名（除非用户指定笔名）
 ```
 
 > 不要在 Skill 中写死 token 查询参数；每次从当前页面 URL 读取 `token=`。
@@ -195,9 +198,22 @@ bodyPm.focus();
 
 生产即时发：勾选群发通知（如需要触达）→ 点对话框内 **「发表」**。
 
-### 6.4 二次确认
+### 6.4 二次确认与叠层
 
-可能再提示「已开启群发通知…」→ 点 **「继续发表」**。
+可能再提示「已开启群发通知…」→ 点 **「继续发表」** 或 **「继续群发」**（文案因版本而异）。
+
+弹窗可能叠层（实测常见）：
+
+| 顺序（常见） | 处理 |
+|--------------|------|
+| 创作来源 | 按策略点无需声明 / 去声明 |
+| 群发设置 + 对话框「发表」 | 确认次数后点发表 |
+| 继续发表 / 继续群发 | 点主按钮继续 |
+| 运营规则学习 / 开始答题 | **用户**完成；Agent 可飞书文字提醒，不代答 |
+| 未授权切换账号 | 仅「我知道了」 |
+| **微信验证 + 二维码** | **最高优先级**：停点、截码、推飞书 |
+
+只要出现「微信验证」，即使其它对话框仍在，也优先处理扫码协作。
 
 ### 6.5 微信验证（高频阻断）
 
@@ -213,19 +229,22 @@ bodyPm.focus();
 
 完整规范见 **`references/feishu-qr-notify.md`**。摘要：
 
-1. `take_screenshot` 优先截取二维码 **img 节点**（不要只靠整页大图）  
-2. 保存：`output/YYYY-MM-DD/wechat-verify-qr.png`  
-3. **清除代理**后：  
+1. **优先** `take_screenshot(uid=「微信二维码」img)` — 手机可扫性最好  
+2. **可选**再截整页作对照  
+3. 保存（建议带账号 slug）：  
+   `output/YYYY-MM-DD/{slug}-wechat-verify-qr.png`  
+4. **清除代理**后发送（文字中写清**账号名 + 标题**）：  
 
 ```bash
 lark-cli im +messages-send --as bot --user-id "$FEISHU_NOTIFY_OPEN_ID" \
-  --text "【公众号发表】请管理员微信尽快扫码验证。标题：…"
+  --text "【公众号发表·{账号显示名}】请管理员微信尽快扫码。标题：…"
 lark-cli im +messages-send --as bot --user-id "$FEISHU_NOTIFY_OPEN_ID" \
-  --image "output/YYYY-MM-DD/wechat-verify-qr.png"   # 必须相对路径
+  --image "output/YYYY-MM-DD/{slug}-wechat-verify-qr.png"   # 必须相对路径
 ```
 
-4. 模板脚本：`templates/feishu-qr-notify.example.sh` / `.ps1`  
-5. 等待用户手机飞书扫码或回复「已扫码」  
+5. 将返回的 `message_id` 写入 `{slug}-publish-status.json` 的 `feishu_qr_notify`  
+6. 模板脚本：`templates/feishu-qr-notify.example.sh` / `.ps1`  
+7. 等待用户手机飞书扫码或回复「已扫码」  
 
 > 禁止把过期历史截图当有效授权码复用。
 
@@ -239,16 +258,17 @@ lark-cli im +messages-send --as bot --user-id "$FEISHU_NOTIFY_OPEN_ID" \
 
 ## 七、发表成功核对（必须做）
 
-打开：
+打开**当前号**的发表记录（token 与当前会话一致）：
 
 ```text
 内容管理 → 发表记录
 # 或
-/cgi-bin/appmsgpublish?sub=list&begin=0&count=10&...
+/cgi-bin/appmsgpublish?sub=list&begin=0&count=10&token={current}&lang=zh_CN
 ```
 
 成功标准：
 
+- 页眉账号名 = 目标号  
 - 列表出现目标标题  
 - 状态为 **「已发表」**  
 - 时间接近操作时刻  

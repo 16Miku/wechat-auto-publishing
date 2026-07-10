@@ -187,7 +187,8 @@ unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY
 → **`references/feishu-qr-notify.md`**  
 → `templates/feishu-qr-notify.example.sh` / `.ps1`  
 
-实战汇总：`references/session-practices.md`。
+实战汇总：`references/session-practices.md`。  
+多账号：`references/multi-account.md`（换号自检、作者、归档 slug）。
 
 ## 打包检查（发布前）
 

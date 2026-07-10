@@ -33,8 +33,9 @@ approval_gate   = required（默认）
 
 ### 通道 B（Chrome）
 
-- [ ] Chrome 已登录 `mp.weixin.qq.com` 目标号  
+- [ ] Chrome 已登录 `mp.weixin.qq.com` **目标号**  
 - [ ] Chrome DevTools MCP `list_pages` 可见公众号页  
+- [ ] **换号自检**：顶栏账号名 + URL `token` + 用户确认（`multi-account.md`）  
 - [ ] 知悉正式发表可能要**管理员扫码**  
 - [ ] 阅读 `references/browser-chrome-publish.md`  
 
@@ -74,13 +75,15 @@ approval_gate   = required（默认）
 
 **Browser：**
 
+- [ ] 再次确认当前账号显示名  
+- [ ] `#author` = 当前显示名（非上一号）  
 - [ ] 新的创作 → 文章  
 - [ ] 标题/正文 ProseMirror **未写混**  
 - [ ] 正文字数 > 0  
 - [ ] 上传 2 张正文图  
 - [ ] 封面从正文选择（或用户已手改）  
 - [ ] 保存草稿，记录 `appmsgid`  
-- [ ] 写 `draft-result.json`  
+- [ ] 写 `{slug}-draft-result.json`  
 
 ### 批准门禁
 
@@ -100,8 +103,8 @@ approval_gate   = required（默认）
 - [ ] 发表 → 声明/群发 → 继续发表  
 - [ ] 若「微信验证」：截 QR →（推荐）清代理后 `lark-cli` 推飞书  
 - [ ] 用户手机扫码或回复「已扫码」  
-- [ ] **发表记录**出现「已发表」  
-- [ ] 写 `publish-status.json`（含 feishu 推送字段若启用）  
+- [ ] **本号**发表记录出现「已发表」  
+- [ ] 写 `{slug}-publish-status.json`（含 account、feishu_qr_notify）  
 
 ---
 
@@ -126,12 +129,14 @@ approval_gate   = required（默认）
 | 标题变成全文 | 修 ProseMirror 写入目标 |
 | 正文字数 0 | 写入 `.rich_media_content .ProseMirror` |
 | freepublish 无主页 | 改浏览器群发路径 |
-| 卡在微信验证 | 截码推飞书；管理员手机扫 |
+| 卡在微信验证 | 节点截码推飞书；管理员手机扫 |
 | 飞书 token 超时 | 清代理后重发 |
 | `--image` 被拒 | 改用相对路径 |
 | 运营规则答题 | 账号方完成学习 |
+| 发到错号 / 作者是旧号 | 停；按 multi-account 自检重来 |
+| 发表记录找不到 | 是否看了另一号的 token/页面 |
 
-详见 `references/publishing.md`、`references/browser-chrome-publish.md`、`references/feishu-qr-notify.md`、`references/session-practices.md`。
+详见 `references/publishing.md`、`references/browser-chrome-publish.md`、`references/multi-account.md`、`references/feishu-qr-notify.md`、`references/session-practices.md`。
 
 ---
 
