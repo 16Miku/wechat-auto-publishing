@@ -37,6 +37,7 @@
   → 群发通知确认
   → 继续发表
   → 微信验证扫码（人）
+       可选：截图二维码 → 飞书推送给手机扫码（见 feishu-qr-notify.md）
   → 发表记录核对「已发表」
 ```
 
@@ -204,12 +205,29 @@ bodyPm.focus();
 
 - 文案类似：扫码后联系管理员验证  
 - 管理员/运营者微信号可直接扫码  
+- 图片节点常见名：`微信二维码`；`src` 常含 `safeqrcode?ticket=`  
 
-**Agent 必须暂停**，通知用户扫码。截图可存：
+**Agent 必须暂停**，不得假装已授权。
 
-`output/YYYY-MM-DD/publish-verify-qr.png`
+#### 推荐：截码并推飞书（已实测可行）
 
-用户回复「已扫码」后继续核对。
+完整规范见 **`references/feishu-qr-notify.md`**。摘要：
+
+1. `take_screenshot` 优先截取二维码 **img 节点**（不要只靠整页大图）  
+2. 保存：`output/YYYY-MM-DD/wechat-verify-qr.png`  
+3. **清除代理**后：  
+
+```bash
+lark-cli im +messages-send --as bot --user-id "$FEISHU_NOTIFY_OPEN_ID" \
+  --text "【公众号发表】请管理员微信尽快扫码验证。标题：…"
+lark-cli im +messages-send --as bot --user-id "$FEISHU_NOTIFY_OPEN_ID" \
+  --image "output/YYYY-MM-DD/wechat-verify-qr.png"   # 必须相对路径
+```
+
+4. 模板脚本：`templates/feishu-qr-notify.example.sh` / `.ps1`  
+5. 等待用户手机飞书扫码或回复「已扫码」  
+
+> 禁止把过期历史截图当有效授权码复用。
 
 ### 6.6 其他可能阻断
 

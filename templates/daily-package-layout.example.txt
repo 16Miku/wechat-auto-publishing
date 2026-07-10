@@ -10,7 +10,9 @@ output/YYYY-MM-DD/
 ├─ beauty2.jpg                # 可选：用户提示词直出原图 2
 ├─ draft-result.json          # 草稿成功：media_id 或 appmsgid
 ├─ draft-preview.png          # 可选：编辑器截图
-├─ publish-verify-qr.png      # 可选：扫码验证截图
+├─ wechat-verify-qr.png       # 可选：当前微信验证二维码（推飞书用）
+├─ publish-verify-qr.png      # 可选：整页扫码截图（备查）
+├─ feishu-notify.json         # 可选：飞书推送 message_id 归档
 ├─ publish-status.json        # 正式发表结果
 └─ draft-beauty-preview.png   # 可选：换图后截图
 

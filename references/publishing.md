@@ -174,6 +174,21 @@ unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY
 
 仅当用户明确表示批准（如「批准发布」「可以发表」「我已扫码发布」）后继续。
 
+## 扫码协作：飞书推送二维码（Browser 正式发表）
+
+当通道 B 弹出「微信验证」时，推荐：
+
+1. 截取当前二维码（节点截图优先）  
+2. `lark-cli` bot 推送到操作员飞书  
+3. 手机扫码完成授权  
+
+完整步骤、代理注意、命令模板：
+
+→ **`references/feishu-qr-notify.md`**  
+→ `templates/feishu-qr-notify.example.sh` / `.ps1`  
+
+实战汇总：`references/session-practices.md`。
+
 ## 打包检查（发布前）
 
 - [ ] `article.md` UTF-8，frontmatter 含 title/summary/cover  

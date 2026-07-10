@@ -24,10 +24,20 @@
   "platform_success": true,
   "operational_success": true,
   "verified_from": "发表记录页",
+  "feishu_qr_notify": {
+    "enabled": true,
+    "sent_at": "2026-07-10T09:28:00+08:00",
+    "target": "ou_xxx_or_oc_xxx",
+    "local_image": "output/2026-07-10/wechat-verify-qr.png",
+    "text_message_id": "om_xxx",
+    "image_message_id": "om_xxx",
+    "scan_status": "done"
+  },
   "error": null,
   "notes": [
     "channel=api 时填写 media_id/publish_id/article_url/publish_status",
     "channel=browser 时填写 appmsgid 与 publish_state",
-    "扫码验证通过后以发表记录为准"
+    "扫码验证通过后以发表记录为准",
+    "启用飞书推码时填写 feishu_qr_notify；测试过期图将 scan_status 标为 expired_test_only"
   ]
 }

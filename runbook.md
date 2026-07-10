@@ -38,6 +38,14 @@ approval_gate   = required（默认）
 - [ ] 知悉正式发表可能要**管理员扫码**  
 - [ ] 阅读 `references/browser-chrome-publish.md`  
 
+### 飞书推码（可选但推荐）
+
+- [ ] `lark-cli` 已安装，`auth status` 中 **bot: ready**  
+- [ ] 已配置 `FEISHU_NOTIFY_OPEN_ID` 或 `FEISHU_NOTIFY_CHAT_ID`（仅本机 env）  
+- [ ] 应用可用范围包含接收人  
+- [ ] 阅读 `references/feishu-qr-notify.md`  
+- [ ] 已知：发飞书前要**清代理**；`--image` 用**相对路径**  
+
 ---
 
 ## 2. Daily execution checklist
@@ -90,9 +98,10 @@ approval_gate   = required（默认）
 **Browser：**
 
 - [ ] 发表 → 声明/群发 → 继续发表  
-- [ ] 用户扫码（若弹出）  
+- [ ] 若「微信验证」：截 QR →（推荐）清代理后 `lark-cli` 推飞书  
+- [ ] 用户手机扫码或回复「已扫码」  
 - [ ] **发表记录**出现「已发表」  
-- [ ] 写 `publish-status.json`  
+- [ ] 写 `publish-status.json`（含 feishu 推送字段若启用）  
 
 ---
 
@@ -117,10 +126,12 @@ approval_gate   = required（默认）
 | 标题变成全文 | 修 ProseMirror 写入目标 |
 | 正文字数 0 | 写入 `.rich_media_content .ProseMirror` |
 | freepublish 无主页 | 改浏览器群发路径 |
-| 卡在微信验证 | 管理员扫码 |
+| 卡在微信验证 | 截码推飞书；管理员手机扫 |
+| 飞书 token 超时 | 清代理后重发 |
+| `--image` 被拒 | 改用相对路径 |
 | 运营规则答题 | 账号方完成学习 |
 
-详见 `references/publishing.md`、`references/browser-chrome-publish.md`。
+详见 `references/publishing.md`、`references/browser-chrome-publish.md`、`references/feishu-qr-notify.md`、`references/session-practices.md`。
 
 ---
 

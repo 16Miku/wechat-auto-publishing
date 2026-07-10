@@ -29,6 +29,13 @@ The skill must not include:
 - Agents may drive an already-open session via DevTools MCP, but must not export cookies into the skill package
 - Archive files may store `appmsgid` / publish timestamps; redact long-lived tokens from saved URLs
 
+## Feishu QR notify rules
+
+- Store only placeholder `FEISHU_NOTIFY_OPEN_ID` / chat id in the skill package
+- Do not commit live `safeqrcode?ticket=` URLs or fresh verify screenshots to public git
+- Prefer keeping QR images under local `output/` (gitignore recommended for production repos)
+- Feishu bot appSecret stays in lark-cli local config, never in this skill
+
 ## Safe example policy
 
 Examples should use placeholders like:

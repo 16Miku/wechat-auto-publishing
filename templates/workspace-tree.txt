@@ -18,7 +18,9 @@
 │  │  ├─ image1.jpg
 │  │  ├─ image2.jpg
 │  │  ├─ draft-result.json
-│  │  └─ publish-status.json
+│  │  ├─ publish-status.json
+│  │  ├─ wechat-verify-qr.png     # optional Feishu push
+│  │  └─ feishu-notify.json       # optional
 │  ├─ full_publish_result.json    # API full pipeline
 │  ├─ publish_log.jsonl
 │  └─ cron.log

@@ -16,6 +16,7 @@
   → 草稿（A 或 B）
   → 人工批准
   → 正式发表（优先 B：后台群发路径）
+  → 若微信验证：截码 → 飞书推送 → 手机扫码
   → 发表记录核对「已发表」
 ```
 
@@ -23,6 +24,8 @@
 
 - 总览：`references/publishing.md`  
 - 浏览器逐步手册：`references/browser-chrome-publish.md`  
+- **飞书推码（已实测）**：`references/feishu-qr-notify.md`  
+- 实战一页纸：`references/session-practices.md`  
 - 检查清单：`templates/browser-checklist.example.md`  
 - 操作员 runbook：`runbook.md`  
 - Agent 入口：`SKILL.md`  
@@ -36,9 +39,10 @@
 3. **配图**：图库 / 概念 AI / **用户提示词直出** / 上传；封面与正文 2 张约定  
 4. **通道 A**：draft/add、`media_id`、可选 freepublish；备用 `templates/publish.mjs`  
 5. **通道 B**：草稿箱新建、双 ProseMirror 防写混、本地上传、从正文选封面、保存、发表、扫码、发表记录核对  
-6. **门禁**：默认禁止未批准自动群发  
-7. **归档**：`output/YYYY-MM-DD/*.json`  
-8. **调度**：默认只自动到草稿 + 通知人  
+6. **飞书扫码协作**：验证弹窗截图 → `lark-cli` bot 推图 → 手机扫码（清代理、相对路径）  
+7. **门禁**：默认禁止未批准自动群发  
+8. **归档**：`output/YYYY-MM-DD/*.json`  
+9. **调度**：默认只自动到草稿 + 通知人  
 
 ---
 
@@ -56,12 +60,16 @@ wechat-auto-publishing-complete/
 │  ├─ image-strategy.md
 │  ├─ publishing.md                 ← 双通道总览
 │  ├─ browser-chrome-publish.md     ← 通道 B 详细手册
+│  ├─ feishu-qr-notify.md           ← 飞书推送微信验证码
+│  ├─ session-practices.md          ← 实战沉淀汇总
 │  ├─ scheduling-and-alerting.md
 │  └─ security-boundary.md
 └─ templates/
    ├─ article-template.md
    ├─ publish.mjs                   ← 通道 A 纯 Node 备用脚本
    ├─ browser-checklist.example.md  ← 通道 B 清单
+   ├─ feishu-qr-notify.example.sh   ← 飞书推码 bash
+   ├─ feishu-qr-notify.example.ps1  ← 飞书推码 PowerShell
    ├─ daily-package-layout.example.txt
    ├─ publish-result.example.json
    ├─ env.example.txt
@@ -79,13 +87,14 @@ wechat-auto-publishing-complete/
 ## 快速开始
 
 1. 读 `SKILL.md` 选通道与模式  
-2. `references/environment-and-config.md` 准备环境  
+2. `references/environment-and-config.md` 准备环境（含可选飞书推码）  
 3. 写稿 + 配图 → 放入 `output/YYYY-MM-DD/`  
 4. **草稿**  
    - API：`node publish.mjs` 或 baoyu API  
    - Browser：按 `browser-chrome-publish.md`  
 5. 等人批准  
-6. **发表**并归档 `publish-status.json`  
+6. **发表**；若微信验证 → 按 `feishu-qr-notify.md` 推码扫码  
+7. 归档 `publish-status.json`  
 
 ---
 
@@ -93,10 +102,11 @@ wechat-auto-publishing-complete/
 
 1. Browser 编辑器有两个 ProseMirror：**标题区 ≠ 正文区**  
 2. 封面稳定做法：先插入正文图 →「从正文选择」  
-3. 正式发表常要 **管理员微信扫码**，Agent 不能代替  
-4. `freepublish` 成功 ≠ 后台手动发表的主页效果  
-5. 图片看真实编码，不看扩展名  
-6. 硬行情数据必须可检索，观点句不要伪装成行情  
+3. 正式发表常要 **管理员微信扫码**，Agent 不能代替；可 **截码推飞书** 手机扫  
+4. 发飞书前 **清代理**；`lark-cli --image` 只用 **相对路径**  
+5. `freepublish` 成功 ≠ 后台手动发表的主页效果  
+6. 图片看真实编码，不看扩展名  
+7. 硬行情数据必须可检索，观点句不要伪装成行情  
 
 ---
 
