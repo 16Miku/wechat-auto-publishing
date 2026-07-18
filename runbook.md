@@ -1,17 +1,23 @@
 # WeChat Auto Publishing Runbook
 
-操作员 / Agent 交接用清单。支持 **API** 与 **Chrome 浏览器** 双通道。
+操作员 / Agent 交接用清单。
 
-## 0. 每次开跑先选通道
+## 0. 每次开跑先选模式
 
 ```text
 publish_channel = api | browser | hybrid
-publish_mode    = draft_only | full_publish
-approval_gate   = required（默认）
+publish_mode    = draft_notify_feishu | draft_only | browser_full | api_freepublish
 ```
 
-- 生产默认：`hybrid` 或 `browser` + `draft_only` + 人工批准后再发  
-- 仅当操作员接受 freepublish 可见性差异时，才用 API `full_publish`  
+| 场景 | 推荐 |
+|------|------|
+| **Linux / OpenClaw 日更** | `api` + **`draft_notify_feishu`** |
+| Windows 本机自动点发表 | `browser` + `browser_full` |
+| 只调试草稿 | `draft_only` |
+| 实验 freepublish | `api_freepublish`（非默认） |
+
+**服务器生产不要默认 freepublish**（可见性可能异常）。  
+详见 `references/draft-notify-feishu.md`。
 
 ---
 
@@ -19,160 +25,102 @@ approval_gate   = required（默认）
 
 ### 通用
 
-- [ ] `python`/`python3`、`node`、`npm`/`npx` 可用（Bun 可选）  
+- [ ] `python`/`node`/`npm` 可用  
 - [ ] 工作目录与 `output/YYYY-MM-DD` 约定清楚  
 - [ ] Skill 包内无真实密钥  
-- [ ] 目标环境 `.baoyu-skills/.env` 已填（仅本机）  
+- [ ] 目标环境 env 已填（`templates/env.example.txt`）  
 
-### 通道 A（API）
+### 通道 A（API）— OpenClaw 必查
 
 - [ ] `WECHAT_APP_ID` / `WECHAT_APP_SECRET` 有效  
-- [ ] IP 白名单已加（以 40164 报错 IP 为准）  
-- [ ] `node templates/publish.mjs` 或 baoyu API 脚本可跑  
-- [ ] 调微信 API 时已清代理  
+- [ ] IP 白名单已加  
+- [ ] 调微信 API 时清代理  
+- [ ] `PUBLISH_MODE=draft_notify_feishu`（或明确 draft_only）  
+- [ ] **不会**在定时任务里自动 freepublish  
 
-### 通道 B（Chrome）
+### 飞书草稿通知（draft_notify_feishu）
 
-- [ ] Chrome 已登录 `mp.weixin.qq.com` **目标号**  
-- [ ] Chrome DevTools MCP `list_pages` 可见公众号页  
-- [ ] **换号自检**：顶栏账号名 + URL `token` + 用户确认（`multi-account.md`）  
-- [ ] 知悉正式发表可能要**管理员扫码**  
-- [ ] 阅读 `references/browser-chrome-publish.md`  
+- [ ] `lark-cli` bot ready  
+- [ ] `FEISHU_NOTIFY_OPEN_ID` 或 `CHAT_ID`  
+- [ ] `WECHAT_ACCOUNT_DISPLAY_NAME` 已填（多号必填）  
+- [ ] `FEISHU_DRAFT_NOTIFY_ENABLED=true`  
+- [ ] 阅读 `references/draft-notify-feishu.md`  
+- [ ] 发飞书前清代理；图片用相对路径  
 
-### 飞书推码（可选但推荐）
+### 通道 B（Chrome，可选）
 
-- [ ] `lark-cli` 已安装，`auth status` 中 **bot: ready**  
-- [ ] 已配置 `FEISHU_NOTIFY_OPEN_ID` 或 `FEISHU_NOTIFY_CHAT_ID`（仅本机 env）  
-- [ ] 应用可用范围包含接收人  
-- [ ] 阅读 `references/feishu-qr-notify.md`  
-- [ ] 已知：发飞书前要**清代理**；`--image` 用**相对路径**  
-
----
-
-## 2. Daily execution checklist
-
-### 内容
-
-- [ ] 采集并过滤资讯（事实可核对）  
-- [ ] 压缩市场角度  
-- [ ] 按模板写稿 + frontmatter  
-- [ ] 区分事实句 / 观点句  
-
-### 图片
-
-- [ ] 确定来源：`user_prompt_direct` / gallery / concept_ai / upload  
-- [ ] 产出 `cover.*`、`image1.jpg`、`image2.jpg`  
-- [ ] 真实格式校验（非 HEIF 伪装）  
-- [ ] 文件落入 `output/YYYY-MM-DD/`  
-
-### 草稿
-
-**API：**
-
-- [ ] 清代理后发布  
-- [ ] 拿到 `media_id`  
-- [ ] 写 `draft-result.json`  
-
-**Browser：**
-
-- [ ] 再次确认当前账号显示名  
-- [ ] `#author` = 当前显示名（非上一号）  
-- [ ] 新的创作 → 文章  
-- [ ] 标题/正文 ProseMirror **未写混**  
-- [ ] 正文字数 > 0  
-- [ ] 上传 2 张正文图  
-- [ ] 封面从正文选择（或用户已手改）  
-- [ ] 保存草稿，记录 `appmsgid`  
-- [ ] 写 `{slug}-draft-result.json`  
-
-### 批准门禁
-
-- [ ] 向用户展示标题/摘要/草稿 ID/配图说明  
-- [ ] **等待明确批准**（默认）  
-
-### 正式发表
-
-**API full_publish：**
-
-- [ ] freepublish + 轮询  
-- [ ] 记录 `publish_id` / `article_url`  
-- [ ] 声明仅技术成功，除非已运营验收  
-
-**Browser：**
-
-- [ ] 发表 → 声明/群发 → 继续发表  
-- [ ] 若「微信验证」：截 QR →（推荐）清代理后 `lark-cli` 推飞书  
-- [ ] 用户手机扫码或回复「已扫码」  
-- [ ] **本号**发表记录出现「已发表」  
-- [ ] 写 `{slug}-publish-status.json`（含 account、feishu_qr_notify）  
+- [ ] Chrome 已登录目标号 + 换号自检  
+- [ ] 阅读 `browser-chrome-publish.md`  
+- [ ] 验证码推送见 `feishu-qr-notify.md`（与草稿通知不同）  
 
 ---
 
-## 3. Failure checklist
+## 2. Daily execution — 服务器主路径（draft_notify_feishu）
 
-- [ ] 保留日志、截图、当日包  
+- [ ] 采集 + 写稿 + 配图  
+- [ ] 组装当日包  
+- [ ] API **仅** draft → 得到 `media_id`  
+- [ ] 清代理  
+- [ ] 飞书发送「待发布·草稿已进箱」（标题/账号/media_id/三步操作/`mp.weixin.qq.com`）  
+- [ ] 可选附封面图  
+- [ ] 归档 `status=draft_ready_notified`  
+- [ ] **本 run 结束**；等管理员后台发表  
+
+### 管理员收到飞书后
+
+- [ ] 打开 https://mp.weixin.qq.com/ （确认账号）  
+- [ ] 草稿箱按标题打开  
+- [ ] 检查后点「发表」  
+- [ ] 发表记录确认为「已发表」  
+
+---
+
+## 3. Daily execution — 本机 Browser（可选）
+
+- [ ] 多账号自检 + author = 当前显示名  
+- [ ] 草稿（API 或 Browser）  
+- [ ] 用户批准  
+- [ ] 发表弹窗链；微信验证 → 节点截码 → 飞书推码  
+- [ ] 本号发表记录「已发表」  
+- [ ] `{slug}-publish-status.json`  
+
+---
+
+## 4. Failure checklist
+
+- [ ] 保留日志、当日包  
+- [ ] draft 无 media_id → 失败告警  
+- [ ] 飞书失败 → 失败告警（即使有 media_id）  
+- [ ] 勿狂点发表浪费群发次数  
 - [ ] 未确认成功前不消耗图库 used  
-- [ ] 记录失败步骤与通道  
-- [ ] 浏览器路径避免连点发表浪费群发次数  
-- [ ] 需要时告警  
 
 ---
 
-## 4. 故障速查
+## 5. 故障速查
 
 | 问题 | 处理 |
 |------|------|
-| API 40164 | 按错误 IP 加白 |
-| Bun / simple-xml 报错 | `node publish.mjs` |
-| 生图 404/401 | 换模型名或走提示词直出/图库 |
-| 40113 图片类型 | 重编码 JPEG/PNG |
-| 标题变成全文 | 修 ProseMirror 写入目标 |
-| 正文字数 0 | 写入 `.rich_media_content .ProseMirror` |
-| freepublish 无主页 | 改浏览器群发路径 |
-| 卡在微信验证 | 节点截码推飞书；管理员手机扫 |
-| 飞书 token 超时 | 清代理后重发 |
-| `--image` 被拒 | 改用相对路径 |
-| 运营规则答题 | 账号方完成学习 |
-| 发到错号 / 作者是旧号 | 停；按 multi-account 自检重来 |
-| 发表记录找不到 | 是否看了另一号的 token/页面 |
-
-详见 `references/publishing.md`、`references/browser-chrome-publish.md`、`references/multi-account.md`、`references/feishu-qr-notify.md`、`references/session-practices.md`。
+| freepublish 搜得到、页上看不到 | 改用 draft_notify_feishu + 手发 |
+| API 40164 | 按报错 IP 加白 |
+| 飞书 token 超时 | 清代理 |
+| 管理员找不到草稿 | 是否登错号；标题是否一致 |
+| Linux 想自动正发 | 不推荐无头登录；用飞书喊人手点 |
+| 错号 / 旧作者 | multi-account 自检 |
 
 ---
 
-## 5. 推荐日常模式
+## 6. 两类飞书消息
 
-### 模式 P1（推荐生产）
-
-1. 采集 + 写稿 + 生图  
-2. Browser 或 API 入草稿  
-3. 人工改封面/审文  
-4. 批准后 Browser 发表 + 扫码  
-5. 发表记录归档  
-
-### 模式 P2（API 实验）
-
-1. 采集 + 写稿 + 生图  
-2. API draft + freepublish  
-3. 归档 URL（接受可见性差异）  
-
-### 模式 P3（仅草稿）
-
-1. 到草稿为止  
-2. 运营在后台自行点发表  
-
----
-
-## 6. Multi-account
-
-一号一目录：独立 `.env`、title 历史、cron、output。  
-Browser 路径：一号一 Chrome 配置/登录态，避免串号。
+| 类型 | 何时 | 模板 |
+|------|------|------|
+| 草稿就绪 | media_id 到手 | `feishu-draft-ready.example.*` |
+| 验证码 | Browser 微信验证 | `feishu-qr-notify.example.*` |
 
 ---
 
 ## 7. Distribution checklist
 
-- [ ] 无真实密钥 / cookie / token  
-- [ ] 示例仅为 placeholder  
-- [ ] 双通道文档可独立跑通  
-- [ ] runbook 与 browser checklist 同步  
+- [ ] 无真实密钥  
+- [ ] 默认模式写清为 draft_notify_feishu  
+- [ ] freepublish 风险可见  
+- [ ] 管理员操作三步在飞书文案中固定  

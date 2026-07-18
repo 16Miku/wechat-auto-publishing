@@ -1,127 +1,87 @@
 # 微信公众号自动发文完整 Skill
 
-把「环境准备 → 资讯整理 → 写稿 → 配图 → **草稿** → **人工批准** → **正式发表** → 归档 → 调度」沉淀为可复现工作流。
+把「环境准备 → 资讯整理 → 写稿 → 配图 → **草稿** → **通知/批准** → **正式发表** → 归档 → 调度」沉淀为可复现工作流。
 
-## 双通道发布（核心升级）
+## 生产默认（服务器 / OpenClaw）
+
+```text
+写稿 + 配图
+  → 微信 API 仅进草稿箱（media_id）
+  → 飞书「待发布·草稿已进箱」+ https://mp.weixin.qq.com/
+  → 管理员在后台手点「发表」
+```
+
+**配置**：`PUBLISH_CHANNEL=api` + `PUBLISH_MODE=draft_notify_feishu`  
+
+**原因**：`freepublish` 常出现「搜得到、页/列表行为异常」；Linux 无头登录微信成本高。  
+**文档**：`references/draft-notify-feishu.md`  
+**脚本**：`templates/feishu-draft-ready.example.sh` / `.ps1`
+
+## 双通道（仍保留）
 
 | 通道 | 名称 | 何时用 |
 |------|------|--------|
-| **A** | **微信开放平台 API** | 有 AppID/Secret、IP 白名单、要脚本/定时 |
-| **B** | **Chrome DevTools 操控本地已登录 Chrome** | 要与后台「发表」一致、可人工改图改封面、可处理扫码 |
+| **A** | 微信开放平台 API | 草稿、定时、服务器 |
+| **B** | Chrome DevTools 本机浏览器 | Windows 上自动点到扫码 |
 
-生产推荐：
+| 模式 | 说明 |
+|------|------|
+| **draft_notify_feishu** | API 草稿 + 飞书待办 + **人手发表**（服务器默认） |
+| draft_only | 仅草稿 |
+| browser_full | 本机浏览器发表 + 可选飞书**验证码** |
+| api_freepublish | 实验；接受可见性风险 |
 
-```text
-写稿 + 配图（本地）
-  → 草稿（A 或 B）
-  → 人工批准
-  → 正式发表（优先 B：后台群发路径）
-  → 若微信验证：截码 → 飞书推送 → 手机扫码
-  → 发表记录核对「已发表」
-```
+## 两类飞书消息
 
-详细步骤：
+| 类型 | 时机 | 文档/模板 |
+|------|------|-----------|
+| 草稿就绪 | 有 media_id 后 | `draft-notify-feishu.md` / `feishu-draft-ready.example.*` |
+| 验证码 | Browser「微信验证」 | `feishu-qr-notify.md` / `feishu-qr-notify.example.*` |
 
-- 总览：`references/publishing.md`  
-- 浏览器逐步手册：`references/browser-chrome-publish.md`  
-- **飞书推码（已实测）**：`references/feishu-qr-notify.md`  
-- 实战一页纸：`references/session-practices.md`  
-- 检查清单：`templates/browser-checklist.example.md`  
-- 操作员 runbook：`runbook.md`  
-- Agent 入口：`SKILL.md`  
+## 详细入口
 
----
-
-## 功能概览
-
-1. **环境与安全**：密钥外置、代理分流（生图可代理 / 微信 API 直连）、多账号隔离  
-2. **内容**：资讯采集、事实/观点分离、账号向口语文风  
-3. **配图**：图库 / 概念 AI / **用户提示词直出** / 上传；封面与正文 2 张约定  
-4. **通道 A**：draft/add、`media_id`、可选 freepublish；备用 `templates/publish.mjs`  
-5. **通道 B**：草稿箱新建、双 ProseMirror 防写混、本地上传、从正文选封面、保存、发表、扫码、发表记录核对  
-6. **飞书扫码协作**：验证弹窗截图 → `lark-cli` bot 推图 → 手机扫码（清代理、相对路径）  
-7. **门禁**：默认禁止未批准自动群发  
-8. **归档**：`output/YYYY-MM-DD/*.json`  
-9. **调度**：默认只自动到草稿 + 通知人  
-
----
+- Agent：`SKILL.md`  
+- 操作员：`runbook.md`  
+- 发布总览：`references/publishing.md`  
+- 实战汇总：`references/session-practices.md`  
+- 多账号：`references/multi-account.md`  
+- Browser：`references/browser-chrome-publish.md`  
 
 ## 目录结构
 
 ```text
 wechat-auto-publishing-complete/
-├─ SKILL.md
-├─ runbook.md
-├─ README.md
+├─ SKILL.md / runbook.md / README.md
 ├─ references/
-│  ├─ environment-and-config.md
-│  ├─ source-gathering.md
-│  ├─ writing-style.md
-│  ├─ image-strategy.md
-│  ├─ publishing.md                 ← 双通道总览
-│  ├─ browser-chrome-publish.md     ← 通道 B 详细手册
-│  ├─ multi-account.md              ← 多账号自检 / 作者 / 跨号复用
-│  ├─ feishu-qr-notify.md           ← 飞书推送微信验证码
-│  ├─ session-practices.md          ← 实战沉淀汇总
-│  ├─ scheduling-and-alerting.md
-│  └─ security-boundary.md
+│  ├─ draft-notify-feishu.md      ← 服务器默认模式
+│  ├─ publishing.md
+│  ├─ browser-chrome-publish.md
+│  ├─ feishu-qr-notify.md
+│  ├─ multi-account.md
+│  ├─ session-practices.md
+│  └─ …
 └─ templates/
-   ├─ article-template.md
-   ├─ publish.mjs                   ← 通道 A 纯 Node 备用脚本
-   ├─ browser-checklist.example.md  ← 通道 B 清单
-   ├─ feishu-qr-notify.example.sh   ← 飞书推码 bash
-   ├─ feishu-qr-notify.example.ps1  ← 飞书推码 PowerShell
-   ├─ daily-package-layout.example.txt
-   ├─ publish-result.example.json
+   ├─ feishu-draft-ready.example.sh / .ps1
+   ├─ feishu-qr-notify.example.sh / .ps1
+   ├─ publish.mjs
    ├─ env.example.txt
-   ├─ workspace-tree.txt
-   ├─ run.sh
-   ├─ run.production-example.sh
-   ├─ cron.example.txt
-   ├─ gallery-config.example.txt
-   ├─ cover-image-extend.example.md
-   └─ image-gen-extend.example.md
+   └─ …
 ```
 
----
+## 快速开始（OpenClaw / Linux）
 
-## 快速开始
+1. 配置 `WECHAT_*` + `FEISHU_NOTIFY_OPEN_ID` + `PUBLISH_MODE=draft_notify_feishu`  
+2. 日更：生成包 → API draft → `feishu-draft-ready` 通知  
+3. 管理员按飞书三步在 mp 后台发表  
+4. 归档 `status=draft_ready_notified`  
 
-1. 读 `SKILL.md` 选通道与模式  
-2. `references/environment-and-config.md` 准备环境（含可选飞书推码）  
-3. 写稿 + 配图 → 放入 `output/YYYY-MM-DD/`  
-4. **草稿**  
-   - API：`node publish.mjs` 或 baoyu API  
-   - Browser：按 `browser-chrome-publish.md`  
-5. 等人批准  
-6. **发表**；若微信验证 → 按 `feishu-qr-notify.md` 推码扫码  
-7. 归档 `publish-status.json`  
+## 实战要点
 
----
-
-## 实战要点（务必读）
-
-1. Browser 编辑器有两个 ProseMirror：**标题区 ≠ 正文区**  
-2. 封面稳定做法：先插入正文图 →「从正文选择」  
-3. 正式发表常要 **管理员微信扫码**，Agent 不能代替；可 **截码推飞书** 手机扫  
-4. 发飞书前 **清代理**；`lark-cli --image` 只用 **相对路径**；**节点截图优先**  
-5. **换号自检**：顶栏名 + token；**作者 = 当前号显示名**  
-6. 发表弹窗会叠层；**微信验证优先级最高**  
-7. `freepublish` 成功 ≠ 后台手动发表的主页效果  
-8. 图片看真实编码，不看扩展名  
-9. 硬行情数据必须可检索，观点句不要伪装成行情  
-
----
+1. 服务器：**不要**默认 freepublish；**不要**默认 Xvfb 登录微信正发  
+2. 飞书链接用稳定首页；慎用 token 深链  
+3. 发飞书前清代理；`--image` 相对路径  
+4. Browser 双 ProseMirror、封面从正文选、换号自检作者  
 
 ## 安全声明
 
-本 Skill **只**含流程、模板、占位配置。  
-**不含**真实 AppID/Secret、Cookie、token、私人账号与路径。
-
----
-
-## 适用对象
-
-- 要标准化公众号日更/半自动发文的人  
-- 要 API 与人工后台两条腿走路的团队  
-- 要把已验证的 Chrome 操控流程固化为可交接 Skill 的人  
+本 Skill 仅含流程、模板、占位配置；不含真实凭证与会话。

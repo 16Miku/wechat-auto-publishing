@@ -28,39 +28,60 @@ GOOGLE_API_KEY=fill_in_valid_value_in_target_environment
 
 ```text
 publish_channel = api | browser | hybrid
-publish_mode    = draft_only | full_publish
-approval_gate   = required | auto
+publish_mode    = draft_notify_feishu | draft_only | browser_full | api_freepublish
 ```
 
-### 生产推荐
+| 模式 | 机器 | 人 | 默认场景 |
+|------|------|-----|----------|
+| **draft_notify_feishu** | API draft + 飞书「草稿就绪」 | mp 后台点发表 | **Linux/OpenClaw 生产默认** |
+| draft_only | 仅草稿 | 自己找草稿 | 调试 |
+| browser_full | 本机 Chrome 点到扫码 | 批准/扫码 | Windows 本机 |
+| api_freepublish | draft + freepublish | 接受可见性风险 | 实验 only |
+
+### 生产推荐 A：服务器 / OpenClaw（默认）
 
 ```text
-内容 + 配图（本地）
-  → 草稿（api 或 browser）
-  → 人工批准（必选）
-  → 正式发表（优先 browser，与后台一致）
+内容 + 配图
+  → API draft/add（media_id）
+  → 飞书「待发布·草稿已进箱」+ https://mp.weixin.qq.com/
+  → 管理员后台手点「发表」
+```
+
+完整说明：`references/draft-notify-feishu.md`  
+脚本：`templates/feishu-draft-ready.example.sh` / `.ps1`
+
+**本模式技术成功 = media_id + 飞书发送成功**；不以 freepublish / 搜一搜为准。
+
+### 生产推荐 B：Windows 本机少点击
+
+```text
+内容 + 配图 → 草稿（api 或 browser）
+  → 人工批准
+  → Browser 发表 + 可选飞书推验证码
   → 发表记录核对
 ```
 
-### 实验 / 无人值守（需书面接受风险）
+### 实验（需书面接受风险）
 
 ```text
 内容 + 配图 → API draft → freepublish → 轮询 article_url
 ```
 
-注意：`freepublish` **技术成功** 不等于后台手动发表的 **运营可见性**。
+注意：`freepublish` **技术成功** 不等于后台手动发表的 **运营可见性**。**OpenClaw 日更不要默认此模式。**
 
 ## 成功判定三层
 
 ### 1. 技术成功
 
-- API：token、上传、draft/add、`media_id`、（可选）`publish_id`  
-- Browser：编辑器「已保存」、`appmsgid`、图片 `mmbiz.qpic` URL  
+- API 草稿：token、上传、draft/add、**`media_id`**  
+- `draft_notify_feishu`：另需飞书通知成功  
+- Browser 草稿：编辑器「已保存」、`appmsgid`、图片 `mmbiz.qpic` URL  
+- `api_freepublish`：（可选）`publish_id` —— **不能单独当作运营成功**  
 
 ### 2. 平台成功
 
-- 草稿箱可见 / 发表记录「已发表」  
-- 发布任务状态成功  
+- 草稿箱可见（draft 模式）  
+- 发表记录「已发表」（人手或 browser 正发后）  
 
 ### 3. 运营成功
 
@@ -174,6 +195,13 @@ unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY
 
 仅当用户明确表示批准（如「批准发布」「可以发表」「我已扫码发布」）后继续。
 
+## 草稿就绪：飞书待办（API / OpenClaw）
+
+`publish_mode=draft_notify_feishu` 时，在 `media_id` 到手后发送飞书摘要，引导管理员后台手发。
+
+→ **`references/draft-notify-feishu.md`**  
+→ `templates/feishu-draft-ready.example.sh` / `.ps1`  
+
 ## 扫码协作：飞书推送二维码（Browser 正式发表）
 
 当通道 B 弹出「微信验证」时，推荐：
@@ -182,13 +210,11 @@ unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY
 2. `lark-cli` bot 推送到操作员飞书  
 3. 手机扫码完成授权  
 
-完整步骤、代理注意、命令模板：
-
 → **`references/feishu-qr-notify.md`**  
 → `templates/feishu-qr-notify.example.sh` / `.ps1`  
 
 实战汇总：`references/session-practices.md`。  
-多账号：`references/multi-account.md`（换号自检、作者、归档 slug）。
+多账号：`references/multi-account.md`。
 
 ## 打包检查（发布前）
 

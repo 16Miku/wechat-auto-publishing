@@ -8,13 +8,32 @@ Allow the article workflow to run on a schedule while keeping failures visible.
 
 ## Scheduling modes
 
-### Production recommendation: `draft_only`
+### Production default (Linux / OpenClaw): `draft_notify_feishu`
 
-Use cron with `draft_only` and let operators manually publish in MP backend. This is recommended when homepage visibility consistency matters.
+```text
+cron/OpenClaw
+  → generate article + images
+  → API draft/add only (media_id)
+  → Feishu “draft ready” notify (title + mp.weixin.qq.com + steps)
+  → exit
+```
 
-### Experimental: `full_publish`
+Operators publish formally in MP admin after Feishu ping.  
+See `references/draft-notify-feishu.md`.
 
-Use cron with `full_publish` only when the operator accepts that API publication may not match backend manual publication in homepage visibility.
+**Do not** schedule `api_freepublish` / freepublish as daily default (homepage visibility may not match manual publish).
+
+### Alternative: `draft_only`
+
+Same as above without Feishu (operators must self-check draft box).
+
+### Experimental: `api_freepublish`
+
+Only when the operator accepts freepublish visibility risk.
+
+### Not recommended on headless Linux
+
+Full browser login to mp.weixin.qq.com via Xvfb for formal publish — high ops cost; prefer draft_notify_feishu.
 
 ## Wrapper script responsibilities
 
@@ -23,10 +42,10 @@ A local wrapper should:
 - gather source material
 - draft the article
 - prepare images
-- publish to draft
-- optionally publish formally
-- save result artifacts
-- notify on failure
+- publish to **draft only** (unless experimental freepublish)
+- send Feishu draft-ready notify when `draft_notify_feishu`
+- save result artifacts (`status=draft_ready_notified`)
+- notify on failure (missing media_id **or** Feishu send failure)
 
 ## Example schedule shapes
 
@@ -43,10 +62,10 @@ Keep at least:
 
 Alert on:
 - token retrieval failure
-- draft publish failure
-- formal submit failure
-- poll timeout
-- missing final article URL
+- draft publish failure (no media_id)
+- **Feishu draft-ready notify failure** (when draft_notify_feishu)
+- formal submit failure (only if freepublish enabled)
+- poll timeout / missing article URL (only if freepublish enabled)
 - image preparation failure without fallback
 - gallery underflow
 - IP 白名单变更告警：公网 IP 可能因运营商变化而改变，建议定期检查出口 IP 是否与白名单一致

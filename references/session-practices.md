@@ -12,10 +12,15 @@
 生产推荐：
 
 ```text
-写稿 + 配图 → 草稿（A 或 B）→ 人工批准 → B 正式发表 → 扫码（可飞书推码）→ 发表记录核对
+# Linux / OpenClaw（默认）
+写稿 + 配图 → API 草稿 → 飞书「草稿就绪」→ 人手 mp 后台发表
+
+# Windows 本机（可选）
+写稿 + 配图 → 草稿 → 批准 → Browser 发表 → 飞书推验证码 → 扫码 → 发表记录
 ```
 
-见：`publishing.md`、`browser-chrome-publish.md`。
+见：`draft-notify-feishu.md`、`publishing.md`、`browser-chrome-publish.md`。  
+**不要**在服务器上默认 freepublish 或 Xvfb 登录微信正发。
 
 ## 2. 多账号自检（换号后必做）
 
@@ -83,7 +88,14 @@ list_pages → 打开 mp 首页/草稿箱
 
 按钮文案可能是「继续发表」或「继续群发」，按可见主按钮点。
 
-## 7. 飞书推送验证码（已测通）
+## 7. 飞书：两类消息
+
+| 类型 | 时机 | 模板 |
+|------|------|------|
+| **草稿就绪** | API 得到 media_id | `feishu-draft-ready.example.*` / `draft-notify-feishu.md` |
+| **验证码** | Browser「微信验证」 | `feishu-qr-notify.example.*` |
+
+## 7b. 飞书推送验证码（Browser，已测通）
 
 ```text
 检测「微信验证」
